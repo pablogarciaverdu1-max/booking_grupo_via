@@ -307,7 +307,7 @@ tr.clickable:hover{background:var(--bg3)}
   <div id="wizardBody"></div>
 </div></div>
 
-<div class="modal-bg" id="modalCitaDetail"><div class="modal"><div class="modal-head"><h2>Detalle de Cita</h2><div style="display:flex;gap:8px;align-items:center;margin-left:auto"><button class="btn" id="citaDetailSaveBtn"></button><button class="btn btn-sm" id="citaDetailFichaBtn" onclick="">Ver ficha del cliente</button><button class="x" onclick="closeModal('modalCitaDetail')">×</button></div></div>
+<div class="modal-bg" id="modalCitaDetail"><div class="modal"><div class="modal-head"><h2>Detalle de Cita</h2><div style="display:flex;gap:8px;align-items:center;margin-left:auto"><button class="btn btn-danger btn-sm" id="citaDetailDeleteBtn"></button><button class="btn" id="citaDetailSaveBtn"></button><button class="btn btn-sm" id="citaDetailFichaBtn" onclick="">Ver ficha del cliente</button><button class="x" onclick="closeModal('modalCitaDetail')">×</button></div></div>
   <div id="citaDetailBody"></div>
 </div></div>
 
@@ -605,9 +605,9 @@ function showCitaDetail(id){
       <label style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--txt2);margin-bottom:10px;display:block">ETAPA</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="stageButtons">${stageButtons(c)}</div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-danger" onclick="cancelarCita('${c.id}')">Eliminar cita</button>
-    </div>`;
+    `;
+  document.getElementById('citaDetailDeleteBtn').textContent='Eliminar cita';
+  document.getElementById('citaDetailDeleteBtn').onclick=()=>cancelarCita('${c.id}');
   document.getElementById('citaDetailSaveBtn').textContent='Guardar cambios';
   document.getElementById('citaDetailSaveBtn').onclick=()=>saveCitaEdit('${c.id}');
   document.getElementById('citaDetailFichaBtn').onclick=()=>{closeModal('modalCitaDetail');curCliente=c.cliente_id;curTab='datos';recState={};renderClienteModal();openModal('modalCliente');};
