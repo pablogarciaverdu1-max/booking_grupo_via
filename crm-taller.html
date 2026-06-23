@@ -566,7 +566,7 @@ function renderCal(){
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
         const isRev=c.tipo_servicio==='primera';
-        const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.12) 3px,transparent 3px,transparent 9px)`:'' ;
+        const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(0,0,0,.08) 0,rgba(0,0,0,.08) 3px,transparent 3px,transparent 9px)`:'' ;
         const citaLabel=isRev?`${esc(cliFull(cl))} - 1º VISITA`:`${esc(cliFull(cl))} · ${sv.label}`;
         h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
@@ -606,8 +606,8 @@ function showCitaDetail(id){
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="stageButtons">${stageButtons(c)}</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn" onclick="saveCitaEdit('${c.id}')">Guardar cambios</button>
       <button class="btn btn-danger btn-sm" onclick="cancelarCita('${c.id}')">Eliminar cita</button>
+      <button class="btn" onclick="saveCitaEdit('${c.id}')">Guardar cambios</button>
     </div>`;
   document.getElementById('citaDetailFichaBtn').onclick=()=>{closeModal('modalCitaDetail');curCliente=c.cliente_id;curTab='datos';recState={};renderClienteModal();openModal('modalCliente');};
   openModal('modalCitaDetail');
