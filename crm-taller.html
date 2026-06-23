@@ -160,6 +160,8 @@ tr.clickable:hover{background:var(--bg3)}
 .toast.ok{border-left-color:#22c55e}.toast.err{border-left-color:#ef4444}.toast.warn{border-left-color:#f97316}
 @keyframes slidein{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
 @keyframes pulse{0%,100%{box-shadow:0 0 4px #ef4444}50%{box-shadow:0 0 10px #ef4444,0 0 4px #ef4444}}
+@keyframes alertPulse{0%,100%{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.3)}50%{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.6)}}
+@keyframes badgePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.1)}}
 
 .recambio-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
 .recambio-row .rn{flex:1}
@@ -1491,7 +1493,7 @@ function checkSolicitudes(){
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const badge=document.getElementById('navBadge');
   if(badge){
-    if(pending.length>0){badge.style.display='flex';badge.textContent=pending.length;}
+    if(pending.length>0){badge.style.display='flex';badge.textContent=pending.length;badge.style.animation='badgePulse 2s infinite';}
     else{badge.style.display='none';}
   }
   if(document.getElementById('solicitudesPanel')){
@@ -1503,7 +1505,7 @@ function renderSolicitudes(pending){
   const el=document.getElementById('solicitudesPanel');
   if(!el)return;
   if(!pending||!pending.length){el.innerHTML='';return;}
-  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:alertPulse 2s infinite">
     <div style="display:flex;align-items:center;gap:8px">
       <div style="width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px #ef4444;animation:pulse 1.5s infinite"></div>
       <span style="font-size:13px;font-weight:700;color:var(--txt)">${pending.length} solicitud${pending.length!==1?'es':''} de reserva pendiente${pending.length!==1?'s':''}</span>
