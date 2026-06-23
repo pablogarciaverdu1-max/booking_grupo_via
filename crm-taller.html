@@ -561,9 +561,10 @@ function renderCal(){
       h+=`<td class="slot"${rsAttr} style="position:relative${rsStyle}" onclick="slotClick('${fecha}','${hora}')">`;
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
-        const isRev=c.tipo_servicio==='primera_revision';
-        const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.12) 3px,transparent 3px,transparent 9px)`:'' ;
-        h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
+        const isRev=c.tipo_servicio==='primera';
+        const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(0,0,0,.08) 0,rgba(0,0,0,.08) 3px,transparent 3px,transparent 9px)`:'' ;
+        const citaLabel=isRev?`${esc(cliFull(cl))} - 1º VISITA`:`${esc(cliFull(cl))} · ${sv.label}`;
+        h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -1632,8 +1633,8 @@ function acceptSolicitud(rid){
     const moto=DB.motos.create({cliente_id:cliId,marca:r.moto_marca,modelo:r.moto_modelo,cilindrada:r.moto_cilindrada||'',matricula:r.moto_matricula||'',bastidor:'',kilometros:r.moto_km||null});
     motoId=moto.id;
   }
-  // Create cita
-  DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||''});
+  // Create cita - todas las citas del booking se marcan como primera (1º revisión)
+  DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:'primera',fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||''});
   saveCitasDataToStorage();syncCitasToStorage();
   // Reset filter to show all mechanics
   document.getElementById('filtroMecanico').value='';
