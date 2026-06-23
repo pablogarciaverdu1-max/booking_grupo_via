@@ -198,7 +198,6 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="nav-item" data-sec="informes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg>Informes</div>
   </div>
   <div class="sidebar-bottom">
-    <button class="toggle-btn" id="themeToggle">Modo oscuro</button><!-- default: light mode active, button offers dark -->
     <div>v1.0.0</div>
   </div>
 </div>
@@ -223,7 +222,7 @@ tr.clickable:hover{background:var(--bg3)}
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#f97316;display:inline-block"></span>Siniestro</span>
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#3b82f6;display:inline-block"></span>ITV</span>
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#22c55e;display:inline-block"></span>Reparación</span>
-      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#eab308;display:inline-block"></span>Primera revisión</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#d4a50a;display:inline-block"></span>Primera revisión</span>
     </div>
     <div class="cal-wrap"><div id="calContainer"></div></div>
   </div>
@@ -368,7 +367,7 @@ const SERVICIOS = {
   siniestro:{label:'Siniestro',color:'#f97316'},
   itv:{label:'ITV',color:'#3b82f6'},
   reparacion:{label:'Reparación',color:'#22c55e'},
-  primera:{label:'Primera revisión',color:'#eab308'},
+  primera:{label:'Primera revisión',color:'#d4a50a'},
 };
 const ESTADOS = {
   pendiente:{label:'Pendiente',color:'#3b82f6'},
@@ -520,9 +519,7 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
   if(sec==='informes')renderInformes();
 });
 
-/* THEME */
-const themeBtn=document.getElementById('themeToggle');
-themeBtn.onclick=()=>{document.body.classList.toggle('light');const l=document.body.classList.contains('light');themeBtn.textContent=l?'Modo oscuro':'Modo claro';};
+/* THEME: Light mode only */
 
 /* ========= CALENDAR (CITAS) ========= */
 let calBaseDate=new Date();
