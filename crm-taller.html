@@ -628,7 +628,7 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
   showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
-  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);saveCliFichaToStorage();saveCitasDataToStorage();closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
+  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);saveCitasDataToStorage();closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
 }
 
 /* ========= WIZARD NUEVA CITA ========= */
@@ -826,7 +826,7 @@ function saveDatos(){
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  DB.clientes.update(curCliente,{nombre,apellidos:document.getElementById('edApellidos').value.trim(),dni,telefono:tel,correo});
+  DB.clientes.update(curCliente,{nombre,apellidos:document.getElementById('edApellidos').value.trim(),dni,telefono:tel,correo});saveCitasDataToStorage();
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
 function tabMotos(c){
@@ -846,9 +846,9 @@ function tabMotos(c){
   });
   h+='</div></div>';return h;
 }
-function addMoto(cid){DB.motos.create({cliente_id:cid,marca:'Honda',modelo:'Nueva',cilindrada:'125cc',matricula:'',bastidor:''});renderClienteModal();toast('Moto añadida','ok');}
-function saveMoto(id){DB.motos.update(id,{marca:document.getElementById('mo_marca_'+id).value,modelo:document.getElementById('mo_modelo_'+id).value.trim(),cilindrada:document.getElementById('mo_cil_'+id).value,matricula:document.getElementById('mo_mat_'+id).value.trim(),bastidor:document.getElementById('mo_bas_'+id).value.trim()});renderClienteModal();toast('Moto guardada','ok');}
-function delMoto(id){confirmDelete('¿Eliminar esta moto?',()=>{DB.motos.delete(id);renderClienteModal();toast('Moto eliminada','warn');});}
+function addMoto(cid){DB.motos.create({cliente_id:cid,marca:'Honda',modelo:'Nueva',cilindrada:'125cc',matricula:'',bastidor:''});saveCitasDataToStorage();renderClienteModal();toast('Moto añadida','ok');}
+function saveMoto(id){DB.motos.update(id,{marca:document.getElementById('mo_marca_'+id).value,modelo:document.getElementById('mo_modelo_'+id).value.trim(),cilindrada:document.getElementById('mo_cil_'+id).value,matricula:document.getElementById('mo_mat_'+id).value.trim(),bastidor:document.getElementById('mo_bas_'+id).value.trim()});saveCitasDataToStorage();renderClienteModal();toast('Moto guardada','ok');}
+function delMoto(id){confirmDelete('¿Eliminar esta moto?',()=>{DB.motos.delete(id);saveCitasDataToStorage();renderClienteModal();toast('Moto eliminada','warn');});}
 function addAnot(id){const t=document.getElementById('mo_nota_'+id).value.trim();if(!t){toast('Escribe una nota','err');return;}const m=DB.motos.get(id);m.anotaciones.push({id:uid(),texto:t,fecha:today()});renderClienteModal();toast('Nota guardada','ok');}
 function tabCitas(c){
   const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
