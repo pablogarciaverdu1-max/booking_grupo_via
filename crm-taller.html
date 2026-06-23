@@ -562,6 +562,7 @@ function renderCal(){
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
         const isBooking=c.desde_booking===true;
+        console.log(`Renderizando: ${c.id}, desde_booking=${isBooking}`);
         const stripeOverlay=isBooking?`,repeating-linear-gradient(45deg,rgba(0,0,0,.08) 0,rgba(0,0,0,.08) 3px,transparent 3px,transparent 9px)`:'' ;
         const citaLabel=isBooking?`${esc(cliFull(cl))} - 1º REVISIÓN`:`${esc(cliFull(cl))} · ${sv.label}`;
         const bgColor=isBooking?'#eab308':sv.color;
@@ -1484,6 +1485,8 @@ function saveDataToStorage(){
   const citasStr=JSON.stringify(DB.citas.all());
   const clientesStr=JSON.stringify(DB.clientes.all());
   const motosStr=JSON.stringify(DB.motos.all());
+  const bookingCitas=DB.citas.all().filter(c=>c.desde_booking===true);
+  console.log('Guardando '+DB.citas.all().length+' citas, '+bookingCitas.length+' desde booking');
   localStorage.setItem('gv_citas_data',citasStr);
   localStorage.setItem('gv_clientes_data',clientesStr);
   localStorage.setItem('gv_motos_data',motosStr);
@@ -1496,7 +1499,11 @@ function loadDataFromStorage(){
     const motosStored=localStorage.getItem('gv_motos_data');
     if(citasStored){
       const loaded=JSON.parse(citasStored);
-      if(Array.isArray(loaded)&&loaded.length>0)citas=loaded;
+      if(Array.isArray(loaded)&&loaded.length>0){
+        citas=loaded;
+        const bookingCitas=citas.filter(c=>c.desde_booking===true);
+        console.log('✓ Cargadas '+citas.length+' citas, '+bookingCitas.length+' desde booking');
+      }
     }
     if(clientesStored){
       const loaded=JSON.parse(clientesStored);
@@ -1647,7 +1654,8 @@ function acceptSolicitud(rid){
   }
   // Create cita from booking - mark with desde_booking flag
   const nuevaCita={cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true};
-  DB.citas.create(nuevaCita);
+  const createdCita=DB.citas.create(nuevaCita);
+  console.log('✓ Cita creada desde booking:',createdCita);
   saveCitasDataToStorage();syncCitasToStorage();
   // Reset filter to show all mechanics
   document.getElementById('filtroMecanico').value='';
