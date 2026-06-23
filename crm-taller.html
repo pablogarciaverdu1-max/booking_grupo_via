@@ -603,9 +603,9 @@ function showCitaDetail(id){
     </div>
     `;
   document.getElementById('citaDetailDeleteBtn').textContent='Eliminar cita';
-  document.getElementById('citaDetailDeleteBtn').onclick=()=>cancelarCita('${c.id}');
+  document.getElementById('citaDetailDeleteBtn').onclick=()=>cancelarCita(c.id);
   document.getElementById('citaDetailSaveBtn').textContent='Guardar cambios';
-  document.getElementById('citaDetailSaveBtn').onclick=()=>saveCitaEdit('${c.id}');
+  document.getElementById('citaDetailSaveBtn').onclick=()=>saveCitaEdit(c.id);
   document.getElementById('citaDetailFichaBtn').onclick=()=>{closeModal('modalCitaDetail');curCliente=c.cliente_id;curTab='datos';recState={};renderClienteModal();openModal('modalCliente');};
   openModal('modalCitaDetail');
 }
