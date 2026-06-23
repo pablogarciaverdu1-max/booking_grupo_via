@@ -1498,6 +1498,17 @@ function loadDataFromStorage(){
   return false;
 }
 function loadCitasFromStorage(){return loadDataFromStorage();}
+function updateIdCounter(){
+  const allIds=[];
+  [...clientes,...motos,...citas,...tareas,...ordenes,...servicios_facturados].forEach(o=>{
+    if(o.id&&o.id.startsWith('id')){
+      const num=parseInt(o.id.substring(2));
+      if(!isNaN(num))allIds.push(num);
+    }
+  });
+  const maxId=allIds.length>0?Math.max(...allIds):0;
+  _id=Math.max(_id,maxId+1);
+}
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
 function getBookingUrl(){return './index.html';}
@@ -1656,7 +1667,7 @@ function rejectSolicitud(rid){
   });
 }
 
-seed();if(!loadCitasFromStorage())saveCitasDataToStorage();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+seed();if(!loadCitasFromStorage())saveCitasDataToStorage();updateIdCounter();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 </script>
 </body>
 </html>
