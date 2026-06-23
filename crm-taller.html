@@ -1468,22 +1468,36 @@ function syncCitasToStorage(){
   }));
   try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
 }
-function saveCitasDataToStorage(){
-  try{localStorage.setItem('gv_citas_data',JSON.stringify(DB.citas.all()));}catch(e){}
-}
-function loadCitasFromStorage(){
+function saveDataToStorage(){
   try{
-    const stored=localStorage.getItem('gv_citas_data');
-    if(stored){
-      const loaded=JSON.parse(stored);
-      if(Array.isArray(loaded)&&loaded.length>0){
-        citas=loaded;
-        return true;
-      }
+    localStorage.setItem('gv_citas_data',JSON.stringify(DB.citas.all()));
+    localStorage.setItem('gv_clientes_data',JSON.stringify(DB.clientes.all()));
+    localStorage.setItem('gv_motos_data',JSON.stringify(DB.motos.all()));
+  }catch(e){}
+}
+function saveCitasDataToStorage(){saveDataToStorage();}
+function loadDataFromStorage(){
+  try{
+    const citasStored=localStorage.getItem('gv_citas_data');
+    const clientesStored=localStorage.getItem('gv_clientes_data');
+    const motosStored=localStorage.getItem('gv_motos_data');
+    if(citasStored){
+      const loaded=JSON.parse(citasStored);
+      if(Array.isArray(loaded)&&loaded.length>0)citas=loaded;
     }
+    if(clientesStored){
+      const loaded=JSON.parse(clientesStored);
+      if(Array.isArray(loaded)&&loaded.length>0)clientes=loaded;
+    }
+    if(motosStored){
+      const loaded=JSON.parse(motosStored);
+      if(Array.isArray(loaded)&&loaded.length>0)motos=loaded;
+    }
+    return(citasStored||clientesStored||motosStored);
   }catch(e){}
   return false;
 }
+function loadCitasFromStorage(){return loadDataFromStorage();}
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
 function getBookingUrl(){return './index.html';}
