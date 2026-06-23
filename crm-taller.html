@@ -524,14 +524,14 @@ themeBtn.onclick=()=>{document.body.classList.toggle('light');const l=document.b
 /* ========= CALENDAR (CITAS) ========= */
 let calBaseDate=new Date();
 function mondayOf(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
-function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
+function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4,5].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function calWeek(n){calBaseDate.setDate(calBaseDate.getDate()+n*7);renderCal();}
 function calToday(){calBaseDate=new Date();renderCal();}
 function renderCal(){
   const days=weekDays(calBaseDate);
-  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
-  const dnames=['Lun','Mar','Mié','Jue','Vie'];
+  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[5].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+  const dnames=['Lun','Mar','Mié','Jue','Vie','Sáb'];
   // Build skip map: di -> set of hora strings spanned by a multi-slot cita
   const skip=days.map((d,di)=>{
     const fecha=ymd(d);const s=new Set();
