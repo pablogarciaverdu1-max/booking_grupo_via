@@ -1481,11 +1481,12 @@ function syncCitasToStorage(){
   try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
 }
 function saveDataToStorage(){
-  try{
-    localStorage.setItem('gv_citas_data',JSON.stringify(DB.citas.all()));
-    localStorage.setItem('gv_clientes_data',JSON.stringify(DB.clientes.all()));
-    localStorage.setItem('gv_motos_data',JSON.stringify(DB.motos.all()));
-  }catch(e){}
+  const citasStr=JSON.stringify(DB.citas.all());
+  const clientesStr=JSON.stringify(DB.clientes.all());
+  const motosStr=JSON.stringify(DB.motos.all());
+  localStorage.setItem('gv_citas_data',citasStr);
+  localStorage.setItem('gv_clientes_data',clientesStr);
+  localStorage.setItem('gv_motos_data',motosStr);
 }
 function saveCitasDataToStorage(){saveDataToStorage();}
 function loadDataFromStorage(){
