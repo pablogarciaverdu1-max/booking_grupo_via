@@ -611,7 +611,7 @@ function saveCitaEdit(id){
   const horaIni=document.getElementById('eHoraIni').value;
   const horaFin=document.getElementById('eHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
-  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitasToStorage();
+  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});saveCitasDataToStorage();syncCitasToStorage();
   toast('Cita actualizada','ok');
   showCitaDetail(id);renderCal();renderKanban();
   if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
@@ -623,12 +623,12 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
     const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);showCitaDetail(citaId);renderKanban();renderCal();}},200);
     return;
   }
-  DB.citas.update(citaId,{estado:nuevoEstado});
+  DB.citas.update(citaId,{estado:nuevoEstado});saveCitasDataToStorage();
   toast('Etapa actualizada','ok');
   showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
-  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
+  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);saveCliFichaToStorage();saveCitasDataToStorage();closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
 }
 
 /* ========= WIZARD NUEVA CITA ========= */
@@ -737,7 +737,7 @@ function wizFinish(){
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
   DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
+  saveCitasDataToStorage();closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
 /* ========= CLIENTES LIST ========= */
@@ -878,7 +878,7 @@ function cambiarEstadoCita(citaId, nuevoEstado){
     const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);renderClienteModal();renderKanban();renderCal();}},200);
     return;
   }
-  DB.citas.update(citaId,{estado:nuevoEstado});
+  DB.citas.update(citaId,{estado:nuevoEstado});saveCitasDataToStorage();
   toast('Estado actualizado','ok');
   renderClienteModal();renderKanban();renderCal();
 }
@@ -1253,11 +1253,11 @@ function kDrop(e,estado){
   if(!dragCita)return;const id=dragCita;dragCita=null;
   const c=DB.citas.get(id);if(!c||c.estado===estado){return;}
   if(estado==='entregado_pagado'){openCompletar(id);return;}
-  DB.citas.update(id,{estado});renderKanban();toast('Estado actualizado','ok');
+  DB.citas.update(id,{estado});saveCitasDataToStorage();renderKanban();toast('Estado actualizado','ok');
 }
 function deleteCitaKanban(id){
   confirmDelete('¿Eliminar esta cita? Esta acción no se puede deshacer.',()=>{
-    DB.citas.delete(id);
+    DB.citas.delete(id);saveCitasDataToStorage();
     renderKanban();renderCal();
     if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
     toast('Cita eliminada','warn');
@@ -1299,7 +1299,7 @@ function confirmCompletar(){
   const std=[];document.querySelectorAll('.cmpStd').forEach(el=>{if(el.checked)std.push(el.value);});
   const c=DB.citas.get(completarCita);
   DB.facturados.create({cita_id:c.id,cliente_id:c.cliente_id,servicios_std:std,servicios_custom:completarCustom.slice()});
-  DB.citas.update(c.id,{estado:'entregado_pagado'});
+  DB.citas.update(c.id,{estado:'entregado_pagado'});saveCitasDataToStorage();
   closeModal('modalCompletar');renderKanban();toast('Servicio completado','ok');
 }
 
@@ -1468,6 +1468,22 @@ function syncCitasToStorage(){
   }));
   try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
 }
+function saveCitasDataToStorage(){
+  try{localStorage.setItem('gv_citas_data',JSON.stringify(DB.citas.all()));}catch(e){}
+}
+function loadCitasFromStorage(){
+  try{
+    const stored=localStorage.getItem('gv_citas_data');
+    if(stored){
+      const loaded=JSON.parse(stored);
+      if(Array.isArray(loaded)&&loaded.length>0){
+        citas=loaded;
+        return true;
+      }
+    }
+  }catch(e){}
+  return false;
+}
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
 function getBookingUrl(){return './index.html';}
@@ -1593,7 +1609,9 @@ function acceptSolicitud(rid){
   }
   // Create cita
   DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||''});
-  syncCitasToStorage();
+  saveCitasDataToStorage();syncCitasToStorage();
+  // Reset filter to show all mechanics
+  document.getElementById('filtroMecanico').value='';
   // Navigate calendar to the week of the new cita
   calBaseDate=new Date(r.fecha+'T12:00:00');
   renderCal();renderKanban();
@@ -1624,7 +1642,7 @@ function rejectSolicitud(rid){
   });
 }
 
-seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+seed();if(!loadCitasFromStorage())saveCitasDataToStorage();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 </script>
 </body>
 </html>
