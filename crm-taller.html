@@ -380,7 +380,7 @@ const RECAMBIOS = [
   {n:'Neumático Delantero',p:150},{n:'Neumático Trasero',p:160},{n:'Disco Freno',p:75},
 ];
 function pad(n){return String(n).padStart(2,'0');}
-const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){a.push(pad(h)+':00');a.push(pad(h)+':30');}return a.filter(x=>x>='08:00'&&x<='18:30');})();
+const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){for(let m=0;m<60;m+=15){a.push(pad(h)+':'+pad(m));};}return a.filter(x=>x>='08:00'&&x<='18:45');})();
 
 /* ========= IN-MEMORY DATA ========= */
 let clientes=[], motos=[], citas=[], tareas=[], ordenes=[], servicios_facturados=[];
