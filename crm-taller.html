@@ -855,13 +855,13 @@ function addAnot(id){const t=document.getElementById('mo_nota_'+id).value.trim()
 function tabCitas(c){
   const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
   const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  const rows=cs.map(x=>`<tr data-cita-id="${x.id}">
-    <td>${x.fecha_cita}</td><td>${x.hora_cita}${x.hora_fin?' – '+x.hora_fin:''}</td><td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td>
+  const rows=cs.map(x=>{const moto=DB.motos.get(x.moto_id);return `<tr data-cita-id="${x.id}">
+    <td>${x.fecha_cita}</td><td>${x.hora_cita}${x.hora_fin?' – '+x.hora_fin:''}</td><td>${servBadge(x.tipo_servicio)}</td><td style="font-size:12px;color:var(--txt2)">${moto?esc(moto.marca+' '+moto.modelo):'—'}</td><td>${mecName(x.mecanico_id)}</td>
     <td style="font-size:12px;color:var(--txt2)">${x.nota?esc(x.nota):'—'}</td>
     <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
       ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
     </select></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
   const bookingUrl=window.location.href.replace(/[^/]*$/,'')+'booking.html';
   return `<div class="tabpane active">
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
@@ -870,7 +870,7 @@ function tabCitas(c){
         Enviar link de reserva al cliente
       </a>
     </div>
-    <table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Mecánico</th><th>Descripción</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Sin citas</td></tr>'}</tbody></table>
+    <table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Moto</th><th>Mecánico</th><th>Descripción</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">Sin citas</td></tr>'}</tbody></table>
   </div>`;
 }
 function cambiarEstadoCita(citaId, nuevoEstado){
