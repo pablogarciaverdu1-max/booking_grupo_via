@@ -567,7 +567,8 @@ function renderCal(){
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
         const isRev=c.tipo_servicio==='primera';
         const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.12) 3px,transparent 3px,transparent 9px)`:'' ;
-        h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
+        const citaLabel=isRev?`${esc(cliFull(cl))} - 1º VISITA`:`${esc(cliFull(cl))} · ${sv.label}`;
+        h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
