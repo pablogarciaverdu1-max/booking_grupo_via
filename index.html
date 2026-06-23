@@ -362,6 +362,7 @@ function renderWeek(){
 function renderDayBody(fecha,slots,d){
   if(!slots.length)return'<div class="closed-msg">Cerrado este día</div>';
   const today=dateStr(new Date());
+  const pendientes=getPendientes().filter(p=>p.fecha===fecha);
   let html='';
   let lastRange='';
   html+='<div class="slots-grid">';
@@ -375,10 +376,12 @@ function renderDayBody(fecha,slots,d){
     const past=isPast(fecha,s.time);
     const occ=isOccupied(fecha,s.time);
     const sel=selectedSlot&&selectedSlot.fecha===fecha&&selectedSlot.hora===s.time;
+    const reservaEnSlot=pendientes.find(p=>p.hora===s.time);
     let cls='slot-btn';
     if(past||occ)cls+=' '+(past?'past':'occupied');
     else if(sel)cls+=' selected';
-    html+=`<div class="${cls}" ${(!past&&!occ)?`onclick="selectSlot('${fecha}','${s.time}','${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}')"`:''} title="${occ?'Ocupado':past?'Hora pasada':''}">${s.time}</div>`;
+    const tooltip=occ?'Ocupado':past?'Hora pasada':reservaEnSlot&&reservaEnSlot.descripcion?`${reservaEnSlot.nombre} - ${reservaEnSlot.descripcion}`:'';
+    html+=`<div class="${cls}" ${(!past&&!occ)?`onclick="selectSlot('${fecha}','${s.time}','${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}')"`:''} title="${tooltip}">${s.time}</div>`;
   });
   html+='</div>';
   return html;

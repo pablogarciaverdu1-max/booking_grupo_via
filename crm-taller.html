@@ -855,6 +855,7 @@ function tabCitas(c){
   const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   const rows=cs.map(x=>`<tr data-cita-id="${x.id}">
     <td>${x.fecha_cita}</td><td>${x.hora_cita}${x.hora_fin?' – '+x.hora_fin:''}</td><td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td>
+    <td style="font-size:12px;color:var(--txt2)">${x.nota?esc(x.nota):'—'}</td>
     <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
       ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
     </select></td>
@@ -867,7 +868,7 @@ function tabCitas(c){
         Enviar link de reserva al cliente
       </a>
     </div>
-    <table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Mecánico</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="empty">Sin citas</td></tr>'}</tbody></table>
+    <table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Mecánico</th><th>Descripción</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Sin citas</td></tr>'}</tbody></table>
   </div>`;
 }
 function cambiarEstadoCita(citaId, nuevoEstado){
