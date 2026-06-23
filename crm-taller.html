@@ -858,11 +858,13 @@ function tabCitas(c){
   const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
   const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   const rows=cs.map(x=>{const moto=DB.motos.get(x.moto_id);return `<tr data-cita-id="${x.id}">
-    <td>${x.fecha_cita}</td><td>${x.hora_cita}${x.hora_fin?' – '+x.hora_fin:''}</td><td>${servBadge(x.tipo_servicio)}</td><td style="font-size:12px;color:var(--txt2)">${moto?esc(moto.marca+' '+moto.modelo):'—'}</td><td>${mecName(x.mecanico_id)}</td>
+    <td><input type="date" id="cf_${x.id}" value="${x.fecha_cita}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px"></td>
+    <td><select id="ch_${x.id}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px"><option value="">— sin fin —</option>${HORAS.map(h=>`<option ${h===x.hora_cita?'selected':''}>${h}</option>`).join('')}</select></td>
+    <td>${servBadge(x.tipo_servicio)}</td><td>${moto?esc(moto.marca+' '+moto.modelo):'—'}</td><td>${mecName(x.mecanico_id)}</td>
     <td style="font-size:12px;color:var(--txt2)">${x.nota?esc(x.nota):'—'}</td>
-    <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
+    <td style="display:flex;gap:4px;align-items:center"><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
       ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
-    </select></td>
+    </select><button class="btn btn-sm" style="padding:4px 8px" onclick="guardarCitaFechaHora('${x.id}')">✓</button></td>
   </tr>`;}).join('');
   const bookingUrl='https://pablogarciaverdu1-max.github.io/booking_grupo_via/';
   return `<div class="tabpane active">
@@ -874,6 +876,16 @@ function tabCitas(c){
     </div>
     <table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Moto</th><th>Mecánico</th><th>Descripción</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">Sin citas</td></tr>'}</tbody></table>
   </div>`;
+}
+function guardarCitaFechaHora(citaId){
+  const cita=DB.citas.get(citaId);if(!cita)return;
+  const nuevaFecha=document.getElementById('cf_'+citaId)?.value;
+  const nuevaHora=document.getElementById('ch_'+citaId)?.value;
+  if(!nuevaFecha||!nuevaHora){toast('Fecha y hora requeridas','err');return;}
+  DB.citas.update(citaId,{fecha_cita:nuevaFecha,hora_cita:nuevaHora});
+  saveCitasDataToStorage();
+  toast('Fecha y hora actualizadas','ok');
+  renderClienteModal();renderCal();syncCitasToStorage();
 }
 function cambiarEstadoCita(citaId, nuevoEstado){
   const c=DB.citas.get(citaId);if(!c)return;
