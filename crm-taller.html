@@ -211,6 +211,7 @@ tr.clickable:hover{background:var(--bg3)}
       <button class="btn btn-sec" onclick="calToday()">Hoy</button>
       <button class="btn btn-sec" onclick="calWeek(1)">Siguiente ›</button>
       <span id="calWeekLabel" style="font-weight:600;margin-left:8px"></span>
+      <select id="filtroMecanico" onchange="renderCal()" style="margin-left:12px;min-width:180px"><option value="">Todos los mecánicos</option></select>
       <button class="btn btn-sec" onclick="abrirPaginaReservas()" style="margin-left:auto;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 9.5a3.536 3.536 0 0 0 5 0l2-2a3.536 3.536 0 0 0-5-5l-1 1"/><path d="M9.5 6.5a3.536 3.536 0 0 0-5 0l-2 2a3.536 3.536 0 0 0 5 5l1-1"/></svg>Compartir calendario</button>
     </div>
     <div id="solicitudesPanel"></div>
@@ -530,12 +531,13 @@ function calWeek(n){calBaseDate.setDate(calBaseDate.getDate()+n*7);renderCal();}
 function calToday(){calBaseDate=new Date();renderCal();}
 function renderCal(){
   const days=weekDays(calBaseDate);
+  const mecFiltro=document.getElementById('filtroMecanico')?.value||'';
   document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
   const dnames=['Lun','Mar','Mié','Jue','Vie'];
   // Build skip map: di -> set of hora strings spanned by a multi-slot cita
   const skip=days.map((d,di)=>{
     const fecha=ymd(d);const s=new Set();
-    citas.filter(c=>c.fecha_cita===fecha&&c.hora_fin).forEach(c=>{
+    citas.filter(c=>c.fecha_cita===fecha&&c.hora_fin&&(!mecFiltro||c.mecanico_id===mecFiltro)).forEach(c=>{
       const si=HORAS.indexOf(c.hora_cita);const ei=HORAS.indexOf(c.hora_fin);
       for(let i=si+1;i<ei&&i>=0;i++)if(HORAS[i])s.add(HORAS[i]);
     });
@@ -549,7 +551,7 @@ function renderCal(){
     days.forEach((d,di)=>{
       if(skip[di].has(hora))return; // spanned by earlier cita, skip td
       const fecha=ymd(d);
-      const cs=citas.filter(c=>c.fecha_cita===fecha&&c.hora_cita===hora);
+      const cs=citas.filter(c=>c.fecha_cita===fecha&&c.hora_cita===hora&&(!mecFiltro||c.mecanico_id===mecFiltro));
       // Rowspan: if single cita with hora_fin, span those slots
       let rs=1;
       if(cs.length===1&&cs[0].hora_fin){
@@ -561,7 +563,7 @@ function renderCal(){
       h+=`<td class="slot"${rsAttr} style="position:relative${rsStyle}" onclick="slotClick('${fecha}','${hora}')">`;
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
-        const isRev=c.tipo_servicio==='primera_revision';
+        const isRev=c.tipo_servicio==='primera';
         const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.12) 3px,transparent 3px,transparent 9px)`:'' ;
         h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
@@ -749,6 +751,7 @@ function populateFilters(){
   document.getElementById('flujoServicio').innerHTML='<option value="">Tipo servicio</option>'+sv;
   document.getElementById('flujoMecanico').innerHTML='<option value="">Mecánico</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
   document.getElementById('funnelMecFiltro').innerHTML='<option value="">Todos los mecánicos</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
+  document.getElementById('filtroMecanico').innerHTML='<option value="">Todos los mecánicos</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
 }
 function renderClientes(){
   const q=(document.getElementById('cliSearch').value||'').toLowerCase().trim();
@@ -862,7 +865,7 @@ function tabCitas(c){
       ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
     </select></td>
   </tr>`;}).join('');
-  const bookingUrl=window.location.href.replace(/[^/]*$/,'')+'booking.html';
+  const bookingUrl='https://pablogarciaverdu1-max.github.io/booking_grupo_via/';
   return `<div class="tabpane active">
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
       <a href="${bookingUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent-blue);color:#fff;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;text-decoration:none">

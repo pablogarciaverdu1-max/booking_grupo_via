@@ -301,7 +301,9 @@ function isPast(fecha,slotTime){
   if(fecha<today)return true;
   if(fecha>today)return false;
   const nowMins=now.getHours()*60+now.getMinutes();
-  return toMins(slotTime)<=nowMins;
+  const slotMins=toMins(slotTime);
+  // No agendar en las próximas 6 horas (360 minutos)
+  return slotMins<(nowMins+360);
 }
 
 // ─── RENDER ─────────────────────────────────────────────────
