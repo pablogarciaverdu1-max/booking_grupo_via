@@ -307,7 +307,7 @@ tr.clickable:hover{background:var(--bg3)}
   <div id="wizardBody"></div>
 </div></div>
 
-<div class="modal-bg" id="modalCitaDetail"><div class="modal"><div class="modal-head"><h2>Detalle de Cita</h2><div style="display:flex;gap:8px;align-items:center"><span id="citaDetailButtons"></span><button class="btn btn-sm" id="citaDetailFichaBtn" onclick="">Ver ficha del cliente</button><button class="x" onclick="closeModal('modalCitaDetail')">×</button></div></div>
+<div class="modal-bg" id="modalCitaDetail"><div class="modal"><div class="modal-head"><h2>Detalle de Cita</h2><div style="display:flex;gap:8px;align-items:center;margin-left:auto"><button class="btn btn-danger btn-sm" id="citaDetailDeleteBtn"></button><button class="btn btn-sm" id="citaDetailFichaBtn" onclick="">Ver ficha del cliente</button><button class="x" onclick="closeModal('modalCitaDetail')">×</button></div></div>
   <div id="citaDetailBody"></div>
 </div></div>
 
@@ -608,7 +608,8 @@ function showCitaDetail(id){
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn" onclick="saveCitaEdit('${c.id}')">Guardar cambios</button>
     </div>`;
-  document.getElementById('citaDetailButtons').innerHTML=`<button class="btn btn-danger btn-sm" onclick="cancelarCita('${c.id}')">Eliminar cita</button>`;
+  document.getElementById('citaDetailDeleteBtn').textContent='Eliminar cita';
+  document.getElementById('citaDetailDeleteBtn').onclick=()=>cancelarCita('${c.id}');
   document.getElementById('citaDetailFichaBtn').onclick=()=>{closeModal('modalCitaDetail');curCliente=c.cliente_id;curTab='datos';recState={};renderClienteModal();openModal('modalCliente');};
   openModal('modalCitaDetail');
 }
