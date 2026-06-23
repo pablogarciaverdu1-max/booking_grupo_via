@@ -1602,6 +1602,8 @@ function acceptSolicitud(rid){
   // Create cita
   DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||''});
   syncCitasToStorage();
+  // Reset filter to show all mechanics
+  document.getElementById('filtroMecanico').value='';
   // Navigate calendar to the week of the new cita
   calBaseDate=new Date(r.fecha+'T12:00:00');
   renderCal();renderKanban();
