@@ -365,7 +365,6 @@ const SERVICIOS = {
   siniestro:{label:'Siniestro',color:'#f97316'},
   itv:{label:'ITV',color:'#3b82f6'},
   reparacion:{label:'Reparación',color:'#22c55e'},
-  primera:{label:'Primera revisión',color:'#eab308'},
 };
 const ESTADOS = {
   pendiente:{label:'Pendiente',color:'#3b82f6'},
@@ -414,13 +413,13 @@ function seed(){
   ct(c1,mt1,'mantenimiento',today(),'09:00','Revisión 10000km','pendiente','m1');
   ct(c1,mt2,'itv',today(),'11:30','Preparar ITV','en_progreso','m2');
   ct(c2,mt3,'reparacion',today(),'16:00','Cambio embrague','pendiente','m3');
-  ct(c2,mt4,'primera',dateOffset(1),'08:30','Primera revisión','pendiente','m6');
+  ct(c2,mt4,'mantenimiento',dateOffset(1),'08:30','Primera revisión','pendiente','m6');
   ct(c3,mt5,'siniestro',dateOffset(1),'10:00','Daño lateral','en_progreso','m7');
   ct(c3,mt5,'mantenimiento',dateOffset(-2),'12:00','','listo_entrega','m4');
   ct(c4,mt6,'reparacion',dateOffset(-3),'14:00','Transmisión','entregado_pagado','m5');
   ct(c4,mt7,'itv',dateOffset(2),'09:30','','pendiente','m8');
   ct(c5,mt8,'mantenimiento',dateOffset(-5),'15:30','','entregado_pagado','m9');
-  ct(c5,mt8,'primera',dateOffset(3),'13:00','','pendiente','m10');
+  ct(c5,mt8,'mantenimiento',dateOffset(3),'13:00','','pendiente','m10');
   servicios_facturados.push({id:uid(),cita_id:citas[6].id,cliente_id:c4,servicios_std:['Cambio aceite','Pastillas freno'],servicios_custom:['Limpieza cadena'],fecha:dateOffset(-3)});
   servicios_facturados.push({id:uid(),cita_id:citas[8].id,cliente_id:c5,servicios_std:['Revisión general'],servicios_custom:[],fecha:dateOffset(-5)});
   function tk(cid,desc,venc,hi,hf,mec,comp){tareas.push({id:uid(),cliente_id:cid,descripcion:desc,fecha_vencimiento:venc,hora_inicio:hi,hora_fin:hf,mecanico_id:mec,completada:comp,fecha_creacion:today()});}
@@ -562,11 +561,9 @@ function renderCal(){
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
         const isBooking=c.desde_booking===true;
-        console.log(`Renderizando: ${c.id}, desde_booking=${isBooking}`);
-        const stripeOverlay=isBooking?`,repeating-linear-gradient(45deg,rgba(0,0,0,.08) 0,rgba(0,0,0,.08) 3px,transparent 3px,transparent 9px)`:'' ;
-        const citaLabel=isBooking?`${esc(cliFull(cl))} - 1º REVISIÓN`:`${esc(cliFull(cl))} · ${sv.label}`;
-        const bgColor=isBooking?'#eab308':sv.color;
-        h+=`<div class="chip" style="background:${bgColor}${stripeOverlay};${chipH}${isBooking?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
+        const bgColor=isBooking?'#a855f7':sv.color;
+        const citaLabel=`${esc(cliFull(cl))} · ${sv.label}`;
+        h+=`<div class="chip" style="background:${bgColor};${chipH}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -1485,8 +1482,6 @@ function saveDataToStorage(){
   const citasStr=JSON.stringify(DB.citas.all());
   const clientesStr=JSON.stringify(DB.clientes.all());
   const motosStr=JSON.stringify(DB.motos.all());
-  const bookingCitas=DB.citas.all().filter(c=>c.desde_booking===true);
-  console.log('Guardando '+DB.citas.all().length+' citas, '+bookingCitas.length+' desde booking');
   localStorage.setItem('gv_citas_data',citasStr);
   localStorage.setItem('gv_clientes_data',clientesStr);
   localStorage.setItem('gv_motos_data',motosStr);
@@ -1499,11 +1494,7 @@ function loadDataFromStorage(){
     const motosStored=localStorage.getItem('gv_motos_data');
     if(citasStored){
       const loaded=JSON.parse(citasStored);
-      if(Array.isArray(loaded)&&loaded.length>0){
-        citas=loaded;
-        const bookingCitas=citas.filter(c=>c.desde_booking===true);
-        console.log('✓ Cargadas '+citas.length+' citas, '+bookingCitas.length+' desde booking');
-      }
+      if(Array.isArray(loaded)&&loaded.length>0)citas=loaded;
     }
     if(clientesStored){
       const loaded=JSON.parse(clientesStored);
@@ -1640,8 +1631,8 @@ function acceptSolicitud(rid){
     cliId=nc.id;
   }
   // Use the CRM service key stored directly by booking.html, fallback to map
-  const srvMap={'Mantenimiento / Revisión':'mantenimiento','Reparación':'reparacion','Siniestro / Golpe':'siniestro','ITV / Puesta a punto':'itv','Primera visita / Consulta':'primera'};
-  const tipoSrv=r.servicio_crm||(srvMap[r.servicio])||'primera';
+  const srvMap={'Mantenimiento / Revisión':'mantenimiento','Reparación':'reparacion','Siniestro / Golpe':'siniestro','ITV / Puesta a punto':'itv','Primera visita / Consulta':'mantenimiento'};
+  const tipoSrv=r.servicio_crm||(srvMap[r.servicio])||'mantenimiento';
   // Create moto (check if same matricula already exists for this client to avoid dups)
   let motoId=null;
   if(r.moto_matricula){
@@ -1654,8 +1645,7 @@ function acceptSolicitud(rid){
   }
   // Create cita from booking - mark with desde_booking flag
   const nuevaCita={cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true};
-  const createdCita=DB.citas.create(nuevaCita);
-  console.log('✓ Cita creada desde booking:',createdCita);
+  DB.citas.create(nuevaCita);
   saveCitasDataToStorage();syncCitasToStorage();
   // Reset filter to show all mechanics
   document.getElementById('filtroMecanico').value='';
