@@ -1646,7 +1646,8 @@ function acceptSolicitud(rid){
     motoId=moto.id;
   }
   // Create cita from booking - mark with desde_booking flag
-  DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true});
+  const nuevaCita={cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true};
+  DB.citas.create(nuevaCita);
   saveCitasDataToStorage();syncCitasToStorage();
   // Reset filter to show all mechanics
   document.getElementById('filtroMecanico').value='';
