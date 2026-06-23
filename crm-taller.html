@@ -823,10 +823,12 @@ function tabDatos(c){return `<div class="tabpane active" style="max-width:560px"
 function saveDatos(){
   const nombre=document.getElementById('edNombre').value.trim();const correo=document.getElementById('edCorreo').value.trim();
   const tel=document.getElementById('edTel').value.trim();const dni=document.getElementById('edDni').value.trim();
+  const apellidos=document.getElementById('edApellidos').value.trim();
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  DB.clientes.update(curCliente,{nombre,apellidos:document.getElementById('edApellidos').value.trim(),dni,telefono:tel,correo});
+  DB.clientes.update(curCliente,{nombre,apellidos,dni,telefono:tel,correo});
+  curTab='datos';
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
 function tabMotos(c){
@@ -1574,9 +1576,9 @@ function acceptSolicitud(rid){
   // Create client (or find existing by phone)
   let cliId=null;
   const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
-  if(existing){cliId=existing.id;}
+  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});}
   else{
-    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:''});
+    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||''});
     cliId=nc.id;
   }
   // Use the CRM service key stored directly by booking.html, fallback to map
