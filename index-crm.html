@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <title>Redirigiendo...</title>
   <script>
-    // Redirige siempre a la versión más reciente
-    // Cada nueva versión = nuevo archivo sin caché
-    window.location.href = './crm-v2.html';
+    // Fuerza descarga sin caché con timestamp (cambia cada minuto)
+    window.location.href = './crm-v2.html?v=' + Math.floor(Date.now()/60000);
   </script>
 </head>
 <body>
