@@ -1377,7 +1377,7 @@ function renderTaskCal(){
 function showTask(id){
   const t=DB.tareas.get(id);const c=cliById(t.cliente_id);
   const btnMarcar=document.createElement('button');btnMarcar.className='btn';btnMarcar.textContent='✓ Marcar completada';btnMarcar.addEventListener('click',()=>marcarTareaCompletada(id));
-  const btnFicha=document.createElement('button');btnFicha.className='btn btn-sec';btnFicha.textContent='Ver ficha cliente';btnFicha.addEventListener('click',()=>{closeModal('modalTask');openCliFicha(t.cliente_id);});
+  const btnFicha=document.createElement('button');btnFicha.className='btn btn-sec';btnFicha.textContent='Ver ficha cliente';btnFicha.addEventListener('click',()=>{closeModal('modalTask');openCliente(t.cliente_id);});
   const divBody=document.createElement('div');divBody.innerHTML=`<div class="field"><label>Tarea</label>${esc(t.descripcion)}</div>
     <div class="field"><label>Cliente</label>${esc(cliFull(c))}</div>
     <div class="field"><label>Mecánico</label>${mecName(t.mecanico_id)}</div>
