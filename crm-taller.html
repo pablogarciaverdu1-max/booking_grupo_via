@@ -1548,11 +1548,12 @@ function checkSolicitudes(){
   let list=[];
   try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
-  const badge=document.getElementById('navBadge');
+  // Badge desactivado - no mostrar bolita roja en Citas
+  /*const badge=document.getElementById('navBadge');
   if(badge){
     if(pending.length>0){badge.style.display='flex';badge.textContent=pending.length;}
     else{badge.style.display='none';}
-  }
+  }*/
   if(document.getElementById('solicitudesPanel')){
     renderSolicitudes(pending);
   }
