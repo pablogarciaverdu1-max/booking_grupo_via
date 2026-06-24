@@ -256,8 +256,10 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>Tareas</h1></div><div class="page-sub">Gestión de tareas y seguimientos</div>
     <div class="card" style="margin-bottom:24px">
       <div class="section-title">Lista de tareas</div>
-      <table><thead><tr><th>✓</th><th>Vencimiento</th><th>Tarea</th><th>Mecánico</th><th>Creación</th></tr></thead>
-      <tbody id="segTbody"></tbody></table>
+      <div style="overflow-x:auto;border-radius:8px">
+        <table style="min-width:700px"><thead><tr><th>✓</th><th>Vencimiento</th><th>Tarea</th><th>Cliente</th><th>Mecánico</th><th>Creación</th></tr></thead>
+        <tbody id="segTbody"></tbody></table>
+      </div>
       <div class="pagination" id="segPagination"></div>
     </div>
     <div class="card">
@@ -1337,7 +1339,7 @@ function renderSeguimientos(){
   const pages=Math.max(1,Math.ceil(list.length/segPer));
   if(segPage>pages)segPage=pages;if(segPage<1)segPage=1;
   const slice=list.slice((segPage-1)*segPer,segPage*segPer);
-  document.getElementById('segTbody').innerHTML=slice.map(t=>`<tr id="segrow_${t.id}"><td><input type="checkbox" onchange="segComplete('${t.id}')"></td><td>${t.fecha_vencimiento}</td><td>${esc(t.descripcion)}</td><td>${mecName(t.mecanico_id)}</td><td>${t.fecha_creacion}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Sin tareas pendientes</td></tr>';
+  document.getElementById('segTbody').innerHTML=slice.map(t=>`<tr id="segrow_${t.id}"><td><input type="checkbox" onchange="segComplete('${t.id}')"></td><td>${t.fecha_vencimiento}</td><td>${esc(t.descripcion)}</td><td><a href="#" onclick="openCliente('${t.cliente_id}');return false" style="color:var(--accent-blue);text-decoration:none;cursor:pointer">${esc(cliFull(cliById(t.cliente_id)))}</a></td><td>${mecName(t.mecanico_id)}</td><td>${t.fecha_creacion}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Sin tareas pendientes</td></tr>';
   document.getElementById('segPagination').innerHTML=`<button class="btn btn-sec btn-sm" ${segPage<=1?'disabled':''} onclick="segPage--;renderSeguimientos()">‹ Anterior</button><span>Página ${segPage} de ${pages}</span><button class="btn btn-sec btn-sm" ${segPage>=pages?'disabled':''} onclick="segPage++;renderSeguimientos()">Siguiente ›</button>`;
 }
 function segComplete(id){
