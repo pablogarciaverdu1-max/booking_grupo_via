@@ -889,15 +889,17 @@ function guardarTodosCambios(clienteId){
   citas.forEach(cita=>{
     const nuevaFecha=document.getElementById('cf_'+cita.id)?.value;
     const nuevaHora=document.getElementById('ch_'+cita.id)?.value;
-    if(nuevaFecha&&nuevaHora&&(nuevaFecha!==cita.fecha_cita||nuevaHora!==cita.hora_cita)){
-      DB.citas.update(cita.id,{fecha_cita:nuevaFecha,hora_cita:nuevaHora});
+    if(nuevaFecha&&(nuevaFecha!==cita.fecha_cita||nuevaHora!==cita.hora_cita)){
+      const updateData={fecha_cita:nuevaFecha};
+      if(nuevaHora)updateData.hora_cita=nuevaHora;
+      DB.citas.update(cita.id,updateData);
       cambios++;
     }
   });
   if(cambios===0){toast('No hay cambios para guardar','info');return;}
-  saveCitasDataToStorage();
+  syncCitasToStorage();
   toast(cambios+' cita(s) actualizada(s)','ok');
-  renderClienteModal();renderCal();syncCitasToStorage();
+  renderClienteModal();renderCal();
 }
 function cambiarEstadoCita(citaId, nuevoEstado){
   const c=DB.citas.get(citaId);if(!c)return;
