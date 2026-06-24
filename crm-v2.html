@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<!-- VERSION: 1.27 -->
+<!-- v1.2.0 -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +45,8 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .nav-item.active{background:rgba(59,130,246,.12);color:var(--txt);border-left-color:#3b82f6;box-shadow:inset 0 0 20px rgba(59,130,246,.06)}
 .nav-item.active svg{opacity:1;filter:drop-shadow(0 0 4px rgba(59,130,246,.7))}
 .sidebar-bottom{padding:14px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--txt2)}
+.toggle-btn{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);color:var(--txt2);padding:8px 12px;border-radius:4px;width:100%;justify-content:center;margin-bottom:8px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;transition:.15s}
+.toggle-btn:hover{border-color:rgba(255,255,255,.2);color:var(--txt)}
 
 /* MAIN */
 #main{flex:1;overflow-y:auto;padding:24px 28px}
@@ -159,8 +161,6 @@ tr.clickable:hover{background:var(--bg3)}
 .toast.ok{border-left-color:#22c55e}.toast.err{border-left-color:#ef4444}.toast.warn{border-left-color:#f97316}
 @keyframes slidein{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
 @keyframes pulse{0%,100%{box-shadow:0 0 4px #ef4444}50%{box-shadow:0 0 10px #ef4444,0 0 4px #ef4444}}
-@keyframes alertPulse{0%,100%{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.3)}50%{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.6)}}
-@keyframes badgePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.1)}}
 
 .recambio-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
 .recambio-row .rn{flex:1}
@@ -197,6 +197,7 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="nav-item" data-sec="informes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg>Informes</div>
   </div>
   <div class="sidebar-bottom">
+    <button class="toggle-btn" id="themeToggle">Modo oscuro</button><!-- default: light mode active, button offers dark -->
     <div>v1.0.0</div>
   </div>
 </div>
@@ -211,7 +212,6 @@ tr.clickable:hover{background:var(--bg3)}
       <button class="btn btn-sec" onclick="calToday()">Hoy</button>
       <button class="btn btn-sec" onclick="calWeek(1)">Siguiente ›</button>
       <span id="calWeekLabel" style="font-weight:600;margin-left:8px"></span>
-      <select id="filtroMecanico" onchange="renderCal()" style="margin-left:12px;min-width:180px"><option value="">Todos los mecánicos</option></select>
       <button class="btn btn-sec" onclick="abrirPaginaReservas()" style="margin-left:auto;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 9.5a3.536 3.536 0 0 0 5 0l2-2a3.536 3.536 0 0 0-5-5l-1 1"/><path d="M9.5 6.5a3.536 3.536 0 0 0-5 0l-2 2a3.536 3.536 0 0 0 5 5l1-1"/></svg>Compartir calendario</button>
     </div>
     <div id="solicitudesPanel"></div>
@@ -305,9 +305,8 @@ tr.clickable:hover{background:var(--bg3)}
   <div id="wizardBody"></div>
 </div></div>
 
-<div class="modal-bg" id="modalCitaDetail"><div class="modal"><div class="modal-head"><h2>Detalle de Cita</h2><div style="display:flex;gap:8px;align-items:center;margin-left:auto"><button class="btn" id="citaDetailSaveBtn" style="padding:9px 14px;font-size:14px"></button><button class="btn btn-sm" id="citaDetailFichaBtn" onclick="" style="padding:9px 14px;font-size:14px">Ver ficha del cliente</button><button class="x" onclick="closeModal('modalCitaDetail')">×</button></div></div>
+<div class="modal-bg" id="modalCitaDetail"><div class="modal"><div class="modal-head"><h2>Detalle de Cita</h2><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" id="citaDetailFichaBtn" onclick="">Ver ficha del cliente</button><button class="x" onclick="closeModal('modalCitaDetail')">×</button></div></div>
   <div id="citaDetailBody"></div>
-  <div style="padding:20px 24px;border-top:1px solid var(--border);margin-top:auto"><button class="btn btn-danger" id="citaDetailDeleteBtn" style="width:100%;padding:9px 14px;font-size:14px"></button></div>
 </div></div>
 
 <div class="modal-bg" id="modalCliente"><div class="modal big"><div class="modal-head" style="padding:20px 24px;border-bottom:1px solid var(--border);margin:0"><h2 id="clienteModalTitle">Cliente</h2><button class="x" onclick="closeModal('modalCliente')">×</button></div>
@@ -380,7 +379,7 @@ const RECAMBIOS = [
   {n:'Neumático Delantero',p:150},{n:'Neumático Trasero',p:160},{n:'Disco Freno',p:75},
 ];
 function pad(n){return String(n).padStart(2,'0');}
-const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){for(let m=0;m<60;m+=15){a.push(pad(h)+':'+pad(m));};}return a.filter(x=>x>='08:00'&&x<='18:45');})();
+const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){a.push(pad(h)+':00');a.push(pad(h)+':30');}return a.filter(x=>x>='08:00'&&x<='18:30');})();
 
 /* ========= IN-MEMORY DATA ========= */
 let clientes=[], motos=[], citas=[], tareas=[], ordenes=[], servicios_facturados=[];
@@ -518,24 +517,25 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
   if(sec==='informes')renderInformes();
 });
 
-/* THEME: Light mode only */
+/* THEME */
+const themeBtn=document.getElementById('themeToggle');
+themeBtn.onclick=()=>{document.body.classList.toggle('light');const l=document.body.classList.contains('light');themeBtn.textContent=l?'Modo oscuro':'Modo claro';};
 
 /* ========= CALENDAR (CITAS) ========= */
 let calBaseDate=new Date();
 function mondayOf(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
-function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
+function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4,5].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function calWeek(n){calBaseDate.setDate(calBaseDate.getDate()+n*7);renderCal();}
 function calToday(){calBaseDate=new Date();renderCal();}
 function renderCal(){
   const days=weekDays(calBaseDate);
-  const mecFiltro=document.getElementById('filtroMecanico')?.value||'';
-  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
-  const dnames=['Lun','Mar','Mié','Jue','Vie'];
+  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[5].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+  const dnames=['Lun','Mar','Mié','Jue','Vie','Sáb'];
   // Build skip map: di -> set of hora strings spanned by a multi-slot cita
   const skip=days.map((d,di)=>{
     const fecha=ymd(d);const s=new Set();
-    citas.filter(c=>c.fecha_cita===fecha&&c.hora_fin&&(!mecFiltro||c.mecanico_id===mecFiltro)).forEach(c=>{
+    citas.filter(c=>c.fecha_cita===fecha&&c.hora_fin).forEach(c=>{
       const si=HORAS.indexOf(c.hora_cita);const ei=HORAS.indexOf(c.hora_fin);
       for(let i=si+1;i<ei&&i>=0;i++)if(HORAS[i])s.add(HORAS[i]);
     });
@@ -549,7 +549,7 @@ function renderCal(){
     days.forEach((d,di)=>{
       if(skip[di].has(hora))return; // spanned by earlier cita, skip td
       const fecha=ymd(d);
-      const cs=citas.filter(c=>c.fecha_cita===fecha&&c.hora_cita===hora&&(!mecFiltro||c.mecanico_id===mecFiltro));
+      const cs=citas.filter(c=>c.fecha_cita===fecha&&c.hora_cita===hora);
       // Rowspan: if single cita with hora_fin, span those slots
       let rs=1;
       if(cs.length===1&&cs[0].hora_fin){
@@ -601,11 +601,10 @@ function showCitaDetail(id){
       <label style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--txt2);margin-bottom:10px;display:block">ETAPA</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="stageButtons">${stageButtons(c)}</div>
     </div>
-    `;
-  document.getElementById('citaDetailDeleteBtn').textContent='Eliminar cita';
-  document.getElementById('citaDetailDeleteBtn').onclick=()=>cancelarCita(c.id);
-  document.getElementById('citaDetailSaveBtn').textContent='Guardar cambios';
-  document.getElementById('citaDetailSaveBtn').onclick=()=>saveCitaEdit(c.id);
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" onclick="saveCitaEdit('${c.id}')">Guardar cambios</button>
+      <button class="btn btn-danger btn-sm" onclick="cancelarCita('${c.id}')">Eliminar cita</button>
+    </div>`;
   document.getElementById('citaDetailFichaBtn').onclick=()=>{closeModal('modalCitaDetail');curCliente=c.cliente_id;curTab='datos';recState={};renderClienteModal();openModal('modalCliente');};
   openModal('modalCitaDetail');
 }
@@ -613,7 +612,7 @@ function saveCitaEdit(id){
   const horaIni=document.getElementById('eHoraIni').value;
   const horaFin=document.getElementById('eHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
-  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitasToStorage();
+  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});saveCitasDataToStorage();syncCitasToStorage();
   toast('Cita actualizada','ok');
   showCitaDetail(id);renderCal();renderKanban();
   if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
@@ -625,12 +624,12 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
     const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);showCitaDetail(citaId);renderKanban();renderCal();}},200);
     return;
   }
-  DB.citas.update(citaId,{estado:nuevoEstado});
+  DB.citas.update(citaId,{estado:nuevoEstado});saveCitasDataToStorage();
   toast('Etapa actualizada','ok');
   showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
-  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
+  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);saveCitasDataToStorage();closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
 }
 
 /* ========= WIZARD NUEVA CITA ========= */
@@ -739,7 +738,7 @@ function wizFinish(){
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
   DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
+  saveCitasDataToStorage();closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
 /* ========= CLIENTES LIST ========= */
@@ -751,7 +750,6 @@ function populateFilters(){
   document.getElementById('flujoServicio').innerHTML='<option value="">Tipo servicio</option>'+sv;
   document.getElementById('flujoMecanico').innerHTML='<option value="">Mecánico</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
   document.getElementById('funnelMecFiltro').innerHTML='<option value="">Todos los mecánicos</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
-  document.getElementById('filtroMecanico').innerHTML='<option value="">Todos los mecánicos</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
 }
 function renderClientes(){
   const q=(document.getElementById('cliSearch').value||'').toLowerCase().trim();
@@ -826,12 +824,10 @@ function tabDatos(c){return `<div class="tabpane active" style="max-width:560px"
 function saveDatos(){
   const nombre=document.getElementById('edNombre').value.trim();const correo=document.getElementById('edCorreo').value.trim();
   const tel=document.getElementById('edTel').value.trim();const dni=document.getElementById('edDni').value.trim();
-  const apellidos=document.getElementById('edApellidos').value.trim();
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  DB.clientes.update(curCliente,{nombre,apellidos,dni,telefono:tel,correo});
-  curTab='datos';
+  DB.clientes.update(curCliente,{nombre,apellidos:document.getElementById('edApellidos').value.trim(),dni,telefono:tel,correo});saveCitasDataToStorage();
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
 function tabMotos(c){
@@ -851,23 +847,22 @@ function tabMotos(c){
   });
   h+='</div></div>';return h;
 }
-function addMoto(cid){DB.motos.create({cliente_id:cid,marca:'Honda',modelo:'Nueva',cilindrada:'125cc',matricula:'',bastidor:''});renderClienteModal();toast('Moto añadida','ok');}
-function saveMoto(id){DB.motos.update(id,{marca:document.getElementById('mo_marca_'+id).value,modelo:document.getElementById('mo_modelo_'+id).value.trim(),cilindrada:document.getElementById('mo_cil_'+id).value,matricula:document.getElementById('mo_mat_'+id).value.trim(),bastidor:document.getElementById('mo_bas_'+id).value.trim()});renderClienteModal();toast('Moto guardada','ok');}
-function delMoto(id){confirmDelete('¿Eliminar esta moto?',()=>{DB.motos.delete(id);renderClienteModal();toast('Moto eliminada','warn');});}
+function addMoto(cid){DB.motos.create({cliente_id:cid,marca:'Honda',modelo:'Nueva',cilindrada:'125cc',matricula:'',bastidor:''});saveCitasDataToStorage();renderClienteModal();toast('Moto añadida','ok');}
+function saveMoto(id){DB.motos.update(id,{marca:document.getElementById('mo_marca_'+id).value,modelo:document.getElementById('mo_modelo_'+id).value.trim(),cilindrada:document.getElementById('mo_cil_'+id).value,matricula:document.getElementById('mo_mat_'+id).value.trim(),bastidor:document.getElementById('mo_bas_'+id).value.trim()});saveCitasDataToStorage();renderClienteModal();toast('Moto guardada','ok');}
+function delMoto(id){confirmDelete('¿Eliminar esta moto?',()=>{DB.motos.delete(id);saveCitasDataToStorage();renderClienteModal();toast('Moto eliminada','warn');});}
 function addAnot(id){const t=document.getElementById('mo_nota_'+id).value.trim();if(!t){toast('Escribe una nota','err');return;}const m=DB.motos.get(id);m.anotaciones.push({id:uid(),texto:t,fecha:today()});renderClienteModal();toast('Nota guardada','ok');}
 function tabCitas(c){
   const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
   const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  const rows=cs.map(x=>{const moto=DB.motos.get(x.moto_id);return `<tr data-cita-id="${x.id}">
-    <td><input type="date" id="cf_${x.id}" value="${x.fecha_cita}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px" onchange="marcarModificado('${x.id}')"></td>
-    <td><select id="ch_${x.id}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px" onchange="marcarModificado('${x.id}')"><option value="">— sin fin —</option>${HORAS.map(h=>`<option ${h===x.hora_cita?'selected':''}>${h}</option>`).join('')}</select></td>
-    <td>${servBadge(x.tipo_servicio)}</td><td>${moto?esc(moto.marca+' '+moto.modelo):'—'}</td><td>${mecName(x.mecanico_id)}</td>
-    <td style="font-size:12px;color:var(--txt2)">${x.nota?esc(x.nota):'—'}</td>
-    <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
+  const rows=cs.map(x=>`<tr data-cita-id="${x.id}" style="position:relative">
+    <td><input type="date" id="cf_${x.id}" value="${x.fecha_cita}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px"></td>
+    <td><select id="ch_${x.id}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px"><option value="">— sin fin —</option>${HORAS.map(h=>`<option ${h===x.hora_cita?'selected':''}>${h}</option>`).join('')}</select></td>
+    <td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td>
+    <td style="display:flex;gap:4px;align-items:center"><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
       ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
-    </select></td>
-  </tr>`;}).join('');
-  const bookingUrl='https://pablogarciaverdu1-max.github.io/booking_grupo_via/';
+    </select><button class="btn btn-sm" style="padding:4px 8px" onclick="updateCitaFechaHora('${x.id}')">✓</button></td>
+  </tr>`).join('');
+  const bookingUrl=window.location.href.replace(/[^/]*$/,'')+'booking.html';
   return `<div class="tabpane active">
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
       <a href="${bookingUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent-blue);color:#fff;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;text-decoration:none">
@@ -875,26 +870,15 @@ function tabCitas(c){
         Enviar link de reserva al cliente
       </a>
     </div>
-    <table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Moto</th><th>Mecánico</th><th>Descripción</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">Sin citas</td></tr>'}</tbody></table>
-    ${rows?`<button class="btn" style="margin-top:12px" onclick="guardarTodosCambios('${c.id}')">Guardar cambios</button>`:''}
+    <table><thead><tr><th>Fecha</th><th>Hora inicio</th><th>Servicio</th><th>Mecánico</th><th style="min-width:200px">Estado / Guardar</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="empty">Sin citas</td></tr>'}</tbody></table>
   </div>`;
 }
-function marcarModificado(citaId){}
-function guardarTodosCambios(clienteId){
-  const cliente=DB.clientes.get(clienteId);if(!cliente)return;
-  const citas=DB.citas.byCliente(clienteId);
-  let cambios=0;
-  citas.forEach(cita=>{
-    const nuevaFecha=document.getElementById('cf_'+cita.id)?.value;
-    const nuevaHora=document.getElementById('ch_'+cita.id)?.value;
-    if(nuevaFecha&&nuevaHora&&(nuevaFecha!==cita.fecha_cita||nuevaHora!==cita.hora_cita)){
-      DB.citas.update(cita.id,{fecha_cita:nuevaFecha,hora_cita:nuevaHora});
-      cambios++;
-    }
-  });
-  if(cambios===0){toast('No hay cambios para guardar','info');return;}
-  saveCitasDataToStorage();
-  toast(cambios+' cita(s) actualizada(s)','ok');
+function updateCitaFechaHora(citaId){
+  const fecha=document.getElementById('cf_'+citaId).value;
+  const hora=document.getElementById('ch_'+citaId).value;
+  if(!fecha||!hora){toast('Fecha y hora requeridas','err');return;}
+  DB.citas.update(citaId,{fecha_cita:fecha,hora_cita:hora});saveCitasDataToStorage();
+  toast('Cita actualizada','ok');
   renderClienteModal();renderCal();syncCitasToStorage();
 }
 function cambiarEstadoCita(citaId, nuevoEstado){
@@ -905,7 +889,7 @@ function cambiarEstadoCita(citaId, nuevoEstado){
     const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);renderClienteModal();renderKanban();renderCal();}},200);
     return;
   }
-  DB.citas.update(citaId,{estado:nuevoEstado});
+  DB.citas.update(citaId,{estado:nuevoEstado});saveCitasDataToStorage();
   toast('Estado actualizado','ok');
   renderClienteModal();renderKanban();renderCal();
 }
@@ -924,13 +908,13 @@ function recQty(i,v){recState[i]=recState[i]||{checked:false};recState[i].qty=Ma
 function recReset(){recState={};renderClienteModal();}
 function recCalc(){let g=0;RECAMBIOS.forEach((r,i)=>{const st=recState[i]||{checked:false,qty:1};const t=st.checked?r.p*st.qty:0;g+=t;const el=document.getElementById('recTotal'+i);if(el)el.textContent='€'+t.toFixed(2);});const ge=document.getElementById('recGrand');if(ge)ge.textContent='€'+g.toFixed(2);}
 function tabTareas(c){
-  const ts=DB.tareas.byCliente(c.id).filter(t=>!t.completada);
+  const ts=DB.tareas.byCliente(c.id);
   return `<div class="tabpane active"><button class="btn" onclick="newTaskForm('${c.id}')">+ Nueva tarea</button>
     <div id="taskFormSlot"></div>
-    <table style="margin-top:14px"><thead><tr><th>Descripción</th><th>Vencimiento</th><th>Horario</th><th>Mecánico</th><th>Cliente</th><th></th></tr></thead>
-    <tbody id="taskRows">${ts.map(t=>taskRow(t)).join('')||'<tr><td colspan="6" class="empty">Sin tareas</td></tr>'}</tbody></table></div>`;
+    <table style="margin-top:14px"><thead><tr><th>Descripción</th><th>Vencimiento</th><th>Horario</th><th>Mecánico</th><th></th></tr></thead>
+    <tbody id="taskRows">${ts.map(t=>taskRow(t)).join('')||'<tr><td colspan="5" class="empty">Sin tareas</td></tr>'}</tbody></table></div>`;
 }
-function taskRow(t){const c=cliById(t.cliente_id);return `<tr><td>${esc(t.descripcion)}</td><td>${t.fecha_vencimiento}</td><td>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</td><td>${mecName(t.mecanico_id)}</td><td style="color:#3b82f6;cursor:pointer;text-decoration:underline" onclick="openCliFicha('${t.cliente_id}')">${esc(cliFull(c))}</td><td><button class="btn btn-sm" onclick="editTaskForm('${t.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delTask('${t.id}','cli')">Eliminar</button></td></tr>`;}
+function taskRow(t){return `<tr><td>${esc(t.descripcion)}</td><td>${t.fecha_vencimiento}</td><td>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</td><td>${mecName(t.mecanico_id)}</td><td><button class="btn btn-sm" onclick="editTaskForm('${t.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delTask('${t.id}','cli')">Eliminar</button></td></tr>`;}
 function taskFormHtml(cid,t){t=t||{};return `<div class="card" style="margin-top:12px">
   <div class="field"><label>Descripción *</label><input id="tfDesc" value="${esc(t.descripcion||'')}"></div>
   <div class="row2"><div class="field"><label>Fecha vencimiento *</label><input type="date" id="tfVenc" value="${t.fecha_vencimiento||today()}"></div>
@@ -1280,11 +1264,11 @@ function kDrop(e,estado){
   if(!dragCita)return;const id=dragCita;dragCita=null;
   const c=DB.citas.get(id);if(!c||c.estado===estado){return;}
   if(estado==='entregado_pagado'){openCompletar(id);return;}
-  DB.citas.update(id,{estado});renderKanban();toast('Estado actualizado','ok');
+  DB.citas.update(id,{estado});saveCitasDataToStorage();renderKanban();toast('Estado actualizado','ok');
 }
 function deleteCitaKanban(id){
   confirmDelete('¿Eliminar esta cita? Esta acción no se puede deshacer.',()=>{
-    DB.citas.delete(id);
+    DB.citas.delete(id);saveCitasDataToStorage();
     renderKanban();renderCal();
     if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
     toast('Cita eliminada','warn');
@@ -1326,7 +1310,7 @@ function confirmCompletar(){
   const std=[];document.querySelectorAll('.cmpStd').forEach(el=>{if(el.checked)std.push(el.value);});
   const c=DB.citas.get(completarCita);
   DB.facturados.create({cita_id:c.id,cliente_id:c.cliente_id,servicios_std:std,servicios_custom:completarCustom.slice()});
-  DB.citas.update(c.id,{estado:'entregado_pagado'});
+  DB.citas.update(c.id,{estado:'entregado_pagado'});saveCitasDataToStorage();
   closeModal('modalCompletar');renderKanban();toast('Servicio completado','ok');
 }
 
@@ -1361,10 +1345,10 @@ function renderTaskCal(){
     h+=`<tr><td class="timecol">${hora}</td>`;
     days.forEach(d=>{
       const fecha=ymd(d);
-      const ts=tareas.filter(t=>t.fecha_vencimiento===fecha&&t.hora_inicio===hora&&!t.completada);
+      const ts=tareas.filter(t=>t.fecha_vencimiento===fecha&&t.hora_inicio===hora);
       h+='<td class="slot">';
-      ts.forEach(t=>{const c=cliById(t.cliente_id);
-        h+=`<div class="chip" style="background:#ef4444" onclick="showTask('${t.id}')">${esc(cliFull(c))} · ${esc(t.descripcion)}</div>`;});
+      ts.forEach(t=>{const style=t.completada?'background:#64748b;text-decoration:line-through':'background:#ef4444';
+        h+=`<div class="chip" style="${style}" onclick="showTask('${t.id}')">${esc(t.descripcion)} · ${mecName(t.mecanico_id)}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -1380,9 +1364,9 @@ function showTask(id){
     <div class="field"><label>Horario</label>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</div>
     <div class="field"><label>Vencimiento</label>${t.fecha_vencimiento}</div>
     <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn" onclick="marcarTareaCompletada('${id}')">✓ Marcar completada</button>
-      <button class="btn btn-sec" onclick="closeModal('modalTask');openCliFicha('${t.cliente_id}')">Ver ficha cliente</button>
+    <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">
+      <button class="btn" style="flex:1;min-width:140px;padding:12px 16px;font-size:15px" onclick="marcarTareaCompletada('${id}')">✓ Marcar completada</button>
+      <button class="btn btn-sec" style="flex:1;min-width:140px;padding:12px 16px;font-size:15px" onclick="closeModal('modalTask');openCliFicha('${t.cliente_id}')">Ver ficha cliente</button>
     </div>`;
   openModal('modalTask');
 }
@@ -1393,7 +1377,6 @@ function marcarTareaCompletada(id){
   closeModal('modalTask');
   renderSeguimientos();
   renderTaskCal();
-  toast('Tarea marcada como completada','ok');
 }
 
 /* ========= INFORMES ========= */
@@ -1508,6 +1491,48 @@ function syncCitasToStorage(){
   }));
   try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
 }
+function saveDataToStorage(){
+  const citasStr=JSON.stringify(DB.citas.all());
+  const clientesStr=JSON.stringify(DB.clientes.all());
+  const motosStr=JSON.stringify(DB.motos.all());
+  localStorage.setItem('gv_citas_data',citasStr);
+  localStorage.setItem('gv_clientes_data',clientesStr);
+  localStorage.setItem('gv_motos_data',motosStr);
+}
+function saveCitasDataToStorage(){saveDataToStorage();}
+function loadDataFromStorage(){
+  try{
+    const citasStored=localStorage.getItem('gv_citas_data');
+    const clientesStored=localStorage.getItem('gv_clientes_data');
+    const motosStored=localStorage.getItem('gv_motos_data');
+    if(citasStored){
+      const loaded=JSON.parse(citasStored);
+      if(Array.isArray(loaded)&&loaded.length>0)citas=loaded;
+    }
+    if(clientesStored){
+      const loaded=JSON.parse(clientesStored);
+      if(Array.isArray(loaded)&&loaded.length>0)clientes=loaded;
+    }
+    if(motosStored){
+      const loaded=JSON.parse(motosStored);
+      if(Array.isArray(loaded)&&loaded.length>0)motos=loaded;
+    }
+    return(citasStored||clientesStored||motosStored);
+  }catch(e){}
+  return false;
+}
+function loadCitasFromStorage(){return loadDataFromStorage();}
+function updateIdCounter(){
+  const allIds=[];
+  [...clientes,...motos,...citas,...tareas,...ordenes,...servicios_facturados].forEach(o=>{
+    if(o.id&&o.id.startsWith('id')){
+      const num=parseInt(o.id.substring(2));
+      if(!isNaN(num))allIds.push(num);
+    }
+  });
+  const maxId=allIds.length>0?Math.max(...allIds):0;
+  _id=Math.max(_id,maxId+1);
+}
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
 function getBookingUrl(){return './index.html';}
@@ -1525,7 +1550,7 @@ function checkSolicitudes(){
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const badge=document.getElementById('navBadge');
   if(badge){
-    if(pending.length>0){badge.style.display='flex';badge.textContent=pending.length;badge.style.animation='badgePulse 2s infinite';}
+    if(pending.length>0){badge.style.display='flex';badge.textContent=pending.length;}
     else{badge.style.display='none';}
   }
   if(document.getElementById('solicitudesPanel')){
@@ -1537,7 +1562,7 @@ function renderSolicitudes(pending){
   const el=document.getElementById('solicitudesPanel');
   if(!el)return;
   if(!pending||!pending.length){el.innerHTML='';return;}
-  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:alertPulse 2s infinite">
+  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
     <div style="display:flex;align-items:center;gap:8px">
       <div style="width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px #ef4444;animation:pulse 1.5s infinite"></div>
       <span style="font-size:13px;font-weight:700;color:var(--txt)">${pending.length} solicitud${pending.length!==1?'es':''} de reserva pendiente${pending.length!==1?'s':''}</span>
@@ -1613,9 +1638,9 @@ function acceptSolicitud(rid){
   // Create client (or find existing by phone)
   let cliId=null;
   const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
-  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});}
+  if(existing){cliId=existing.id;}
   else{
-    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||''});
+    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:''});
     cliId=nc.id;
   }
   // Use the CRM service key stored directly by booking.html, fallback to map
@@ -1632,8 +1657,9 @@ function acceptSolicitud(rid){
     motoId=moto.id;
   }
   // Create cita from booking - mark with desde_booking flag
-  DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true});
-  syncCitasToStorage();
+  const nuevaCita={cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true};
+  DB.citas.create(nuevaCita);
+  saveCitasDataToStorage();syncCitasToStorage();
   // Reset filter to show all mechanics
   document.getElementById('filtroMecanico').value='';
   // Navigate calendar to the week of the new cita
@@ -1666,7 +1692,7 @@ function rejectSolicitud(rid){
   });
 }
 
-seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+seed();if(!loadCitasFromStorage())saveCitasDataToStorage();updateIdCounter();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 </script>
 </body>
 </html>
