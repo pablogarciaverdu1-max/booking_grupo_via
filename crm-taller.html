@@ -1363,8 +1363,20 @@ function showTask(id){
     <div class="field"><label>Mecánico</label>${mecName(t.mecanico_id)}</div>
     <div class="field"><label>Horario</label>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</div>
     <div class="field"><label>Vencimiento</label>${t.fecha_vencimiento}</div>
-    <div class="field"><label>Estado</label>${t.completada?'Completada':'Pendiente'}</div>`;
+    <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>
+    <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">
+      <button class="btn" style="flex:1;min-width:140px;padding:12px 16px;font-size:15px" onclick="marcarTareaCompletada('${id}')">✓ Marcar completada</button>
+      <button class="btn btn-sec" style="flex:1;min-width:140px;padding:12px 16px;font-size:15px" onclick="closeModal('modalTask');openCliFicha('${t.cliente_id}')">Ver ficha cliente</button>
+    </div>`;
   openModal('modalTask');
+}
+function marcarTareaCompletada(id){
+  const t=DB.tareas.get(id);if(!t)return;
+  DB.tareas.update(id,{completada:true});
+  saveCitasDataToStorage();
+  closeModal('modalTask');
+  renderSeguimientos();
+  renderTaskCal();
 }
 
 /* ========= INFORMES ========= */
