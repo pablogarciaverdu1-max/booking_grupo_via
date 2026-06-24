@@ -1666,7 +1666,7 @@ function rejectSolicitud(rid){
   });
 }
 
-seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+// loadDemoData() called belowpopulateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 
 // ========= CARGA DE DATOS DEMO ==========
 function loadDemoData(){
@@ -1688,7 +1688,7 @@ function loadDemoData(){
     .catch(err=>toast('Error cargando demo: '+err.message,'err'));
 }
 
-// Descomentar la siguiente línea para cargar DEMO en lugar de seed
+setTimeout(loadDemoData, 100); // Auto-load DEMO data
 // loadDemoData();
 </script>
 </body>
