@@ -1389,7 +1389,7 @@ function showTask(id){
 function marcarTareaCompletada(id){
   const t=DB.tareas.get(id);if(!t)return;
   DB.tareas.update(id,{completada:true});
-  saveCitasDataToStorage();
+  syncCitasToStorage();
   closeModal('modalTask');
   renderSeguimientos();
   renderTaskCal();
