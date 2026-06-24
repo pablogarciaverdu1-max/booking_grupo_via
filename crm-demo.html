@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<!-- CRM DEMO v3.0 - 5,000 Clientes Simulados -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRUPO VIA - CRM DEMO (5,000 clientes)</title>
+<style>
+:root{--bg:#0b0d14;--bg2:#10131e;--bg3:#181c2e;--bg4:#1e2235;--modal:#14172a;--txt:#e8eaf0;--txt2:#7b82a0;--accent:#ffffff;--border:#232740;--border2:#2e3350;--card:#13162a;--shadow:rgba(0,0,0,.7);--accent-blue:#3b82f6;}
+body.light{--bg:#f0f2f8;--bg2:#ffffff;--bg3:#e8ebf5;--bg4:#dde1f0;--modal:#ffffff;--txt:#0d1020;--txt2:#505878;--accent:#0d1020;--border:#c8cde0;--border2:#a0a8c8;--card:#ffffff;--shadow:rgba(0,0,0,.1);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);display:flex;height:100vh;overflow:hidden;font-size:14px}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px}
+#sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;height:100vh;box-shadow:2px 0 24px rgba(0,0,0,.6)}
+.logo{padding:22px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 100%)}
+.logo .name{font-size:17px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--txt);text-shadow:0 0 18px rgba(255,255,255,.15)}
+.logo .sub{font-size:10px;color:var(--txt2);margin-top:3px;letter-spacing:.1em;text-transform:uppercase}
+.nav{flex:1;padding:14px 10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:4px;color:var(--txt2);cursor:pointer;margin-bottom:2px;font-weight:500;font-size:13px;letter-spacing:.01em;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--bg4);color:var(--txt);border-left-color:var(--border2)}
+.nav-item.active{background:rgba(59,130,246,.12);color:var(--txt);border-left-color:#3b82f6;box-shadow:inset 0 0 20px rgba(59,130,246,.06)}
+#main{flex:1;overflow-y:auto;padding:24px 28px}
+.section{display:none}
+.section.active{display:block}
+h1{font-size:24px;font-weight:800;letter-spacing:-.01em;color:var(--txt);text-shadow:0 0 24px rgba(255,255,255,.1)}
+.page-sub{color:var(--txt2);margin-bottom:20px;font-size:13px}
+.btn{background:#3b82f6;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:600;transition:.15s;box-shadow:0 0 12px rgba(59,130,246,.3);cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn-sec{background:var(--bg3);color:var(--txt)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+input[type="text"],input[type="search"]{background:var(--bg3);border:1px solid var(--border2);color:var(--txt);padding:9px 12px;border-radius:8px;outline:none;width:100%;max-width:400px}
+input[type="text"]:focus,input[type="search"]:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{text-align:left;padding:10px 12px;font-size:12px;color:var(--txt2);border-bottom:1px solid var(--border);font-weight:600;background:var(--bg3)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover{background:var(--bg3)}
+tr.clickable{cursor:pointer}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#fff;background:#3b82f6}
+.pagination{display:flex;gap:8px;align-items:center;margin-top:16px;justify-content:center}
+.pagination button{padding:6px 12px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--txt);cursor:pointer}
+.pagination button:disabled{opacity:0.5;cursor:not-allowed}
+.pagination button:hover:not(:disabled){background:var(--bg4)}
+.pagination .info{font-size:12px;color:var(--txt2)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--modal);border:1px solid var(--border2);border-radius:14px;padding:24px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 16px 60px rgba(0,0,0,.8)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h2{font-size:18px}
+.close-btn{background:none;border:none;color:var(--txt2);font-size:24px;cursor:pointer}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--txt2);margin-bottom:4px;font-weight:600}
+.field input,.field select{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);color:var(--txt);border-radius:8px}
+.loading{text-align:center;padding:40px;color:var(--txt2)}
+.progress-bar{width:100%;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;background:#3b82f6;transition:width .3s}
+.stats-card{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-bottom:16px}
+.stats-card .label{font-size:12px;color:var(--txt2);margin-bottom:4px}
+.stats-card .value{font-size:24px;font-weight:700;color:var(--txt)}
+.error{color:#ef4444;padding:12px;background:rgba(239,68,68,.1);border-radius:8px;margin-bottom:16px}
+.success{color:#22c55e;padding:12px;background:rgba(34,197,94,.1);border-radius:8px;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="logo">
+    <div class="name">GRUPO VIA</div>
+    <div class="sub">CRM DEMO 5K</div>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" data-sec="dashboard">📊 Dashboard</div>
+    <div class="nav-item" data-sec="clientes">👥 Clientes (5K)</div>
+    <div class="nav-item" data-sec="citas">📅 Citas (25K)</div>
+    <div class="nav-item" data-sec="tareas">✓ Tareas (10K)</div>
+  </div>
+</div>
+
+<div id="main">
+  <!-- DASHBOARD -->
+  <div class="section active" id="sec-dashboard">
+    <h1>Dashboard - DEMO 5,000 Clientes</h1>
+    <p class="page-sub">Sistema con datos simulados para demostración</p>
+    
+    <div id="loadingContainer" style="display:none;text-align:center;padding:40px;">
+      <h2>Cargando 5,000 clientes...</h2>
+      <div class="progress-bar" style="margin-top:20px;">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <p id="loadingStatus" style="margin-top:10px;color:var(--txt2)">Inicializando...</p>
+    </div>
+
+    <div id="dashboardContent" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+        <div class="stats-card">
+          <div class="label">Total Clientes</div>
+          <div class="value" id="statClientes">-</div>
+        </div>
+        <div class="stats-card">
+          <div class="label">Total Citas</div>
+          <div class="value" id="statCitas">-</div>
+        </div>
+        <div class="stats-card">
+          <div class="label">Total Motos</div>
+          <div class="value" id="statMotos">-</div>
+        </div>
+        <div class="stats-card">
+          <div class="label">Total Tareas</div>
+          <div class="value" id="statTareas">-</div>
+        </div>
+      </div>
+
+      <div class="stats-card" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3)">
+        <h3 style="margin-bottom:12px">✓ Sistema Listo</h3>
+        <p style="color:var(--txt2);font-size:13px">Todos los datos han sido cargados correctamente. Puedes navegar a través de:</p>
+        <ul style="margin-top:10px;color:var(--txt2);font-size:13px;padding-left:20px">
+          <li>Clientes: Ver todos los 5,000 clientes (paginado)</li>
+          <li>Citas: 25,000 citas de clientes simulados</li>
+          <li>Tareas: 10,000 tareas pendientes y completadas</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="section" id="sec-clientes">
+    <h1>Clientes (5,000)</h1>
+    <p class="page-sub">Listado completo de clientes con búsqueda</p>
+    
+    <div class="toolbar">
+      <input type="search" id="searchClientes" placeholder="Buscar por nombre, teléfono, DNI..." style="max-width:100%;">
+      <span id="searchResultCount" style="color:var(--txt2);font-size:12px;margin-left:auto;"></span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>DNI</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tableClientes">
+        <tr><td colspan="5" style="text-align:center;color:var(--txt2)">Cargando...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="pagination" id="paginationClientes"></div>
+  </div>
+
+  <!-- CITAS -->
+  <div class="section" id="sec-citas">
+    <h1>Citas (25,000)</h1>
+    <p class="page-sub">Todas las citas simuladas del sistema</p>
+    
+    <div class="toolbar">
+      <input type="search" id="searchCitas" placeholder="Buscar por cliente, servicio..." style="max-width:100%;">
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Fecha</th>
+          <th>Servicio</th>
+          <th>Estado</th>
+          <th>Origen</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tableCitas">
+        <tr><td colspan="6" style="text-align:center;color:var(--txt2)">Cargando...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="pagination" id="paginationCitas"></div>
+  </div>
+
+  <!-- TAREAS -->
+  <div class="section" id="sec-tareas">
+    <h1>Tareas (10,000)</h1>
+    <p class="page-sub">Gestión de tareas de clientes</p>
+    
+    <div class="toolbar">
+      <input type="search" id="searchTareas" placeholder="Buscar tareas..." style="max-width:100%;">
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Descripción</th>
+          <th>Vencimiento</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tableTareas">
+        <tr><td colspan="5" style="text-align:center;color:var(--txt2)">Cargando...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="pagination" id="paginationTareas"></div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE DETALLE -->
+<div class="modal-bg" id="modalCliente">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Ficha del Cliente</h2>
+      <button class="close-btn" onclick="closeModal('modalCliente')">×</button>
+    </div>
+    <div id="modalClienteContent"></div>
+  </div>
+</div>
+
+<script>
+// ============= GLOBAL STATE =============
+let DB = {
+  clientes: [],
+  citas: [],
+  motos: [],
+  tareas: []
+};
+
+let currentPage = {
+  clientes: 1,
+  citas: 1,
+  tareas: 1
+};
+
+const ITEMS_PER_PAGE = 50;
+
+// ============= NAVEGACION =============
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const section = item.dataset.sec;
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + section).classList.add('active');
+    item.classList.add('active');
+    currentPage[section] = 1;
+    renderSection(section);
+  });
+});
+
+// ============= CARGAR DATOS =============
+async function loadData() {
+  const loading = document.getElementById('loadingContainer');
+  const dashboard = document.getElementById('dashboardContent');
+  const progressFill = document.getElementById('progressFill');
+  const loadingStatus = document.getElementById('loadingStatus');
+
+  loading.style.display = 'block';
+
+  try {
+    loadingStatus.textContent = 'Descargando datos (5,000 clientes)...';
+    const response = await fetch('./datos_demo.json');
+    if (!response.ok) throw new Error('Error al descargar datos');
+    
+    const data = await response.json();
+    
+    loadingStatus.textContent = 'Procesando clientes...';
+    progressFill.style.width = '25%';
+    DB.clientes = data.clientes;
+    
+    loadingStatus.textContent = 'Procesando citas...';
+    progressFill.style.width = '50%';
+    DB.citas = data.citas;
+    
+    loadingStatus.textContent = 'Procesando motos...';
+    progressFill.style.width = '75%';
+    DB.motos = data.motos;
+    
+    loadingStatus.textContent = 'Procesando tareas...';
+    progressFill.style.width = '90%';
+    DB.tareas = data.tareas;
+    
+    loadingStatus.textContent = 'Completado!';
+    progressFill.style.width = '100%';
+    
+    // Actualizar estadísticas
+    document.getElementById('statClientes').textContent = DB.clientes.length.toLocaleString();
+    document.getElementById('statCitas').textContent = DB.citas.length.toLocaleString();
+    document.getElementById('statMotos').textContent = DB.motos.length.toLocaleString();
+    document.getElementById('statTareas').textContent = DB.tareas.length.toLocaleString();
+    
+    setTimeout(() => {
+      loading.style.display = 'none';
+      dashboard.style.display = 'block';
+    }, 500);
+    
+  } catch (error) {
+    loadingStatus.textContent = '❌ Error al cargar datos: ' + error.message;
+    loadingStatus.style.color = '#ef4444';
+  }
+}
+
+// ============= BUSQUEDA =============
+document.getElementById('searchClientes').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = DB.clientes.filter(c => 
+    c.nombre.toLowerCase().includes(query) || 
+    c.apellidos.toLowerCase().includes(query) ||
+    c.telefono.includes(query) ||
+    c.dni.includes(query)
+  );
+  
+  const count = document.getElementById('searchResultCount');
+  count.textContent = `${filtered.length} resultados`;
+  
+  renderClientesTable(filtered, 1, ITEMS_PER_PAGE);
+  renderPagination('clientes', filtered.length, ITEMS_PER_PAGE, (page) => {
+    renderClientesTable(filtered, page, ITEMS_PER_PAGE);
+  });
+});
+
+document.getElementById('searchCitas').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = DB.citas.filter(c => {
+    const cli = DB.clientes.find(cl => cl.id === c.cliente_id);
+    return (cli && (cli.nombre + ' ' + cli.apellidos).toLowerCase().includes(query)) ||
+           c.tipo_servicio.includes(query);
+  });
+  
+  renderCitasTable(filtered, 1, ITEMS_PER_PAGE);
+  renderPagination('citas', filtered.length, ITEMS_PER_PAGE, (page) => {
+    renderCitasTable(filtered, page, ITEMS_PER_PAGE);
+  });
+});
+
+document.getElementById('searchTareas').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = DB.tareas.filter(t => 
+    t.descripcion.toLowerCase().includes(query)
+  );
+  
+  renderTareasTable(filtered, 1, ITEMS_PER_PAGE);
+  renderPagination('tareas', filtered.length, ITEMS_PER_PAGE, (page) => {
+    renderTareasTable(filtered, page, ITEMS_PER_PAGE);
+  });
+});
+
+// ============= RENDER CLIENTES =============
+function renderClientesTable(data = DB.clientes, page = 1, perPage = ITEMS_PER_PAGE) {
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const pageData = data.slice(start, end);
+  
+  let html = pageData.map(c => `
+    <tr>
+      <td><strong>${c.nombre} ${c.apellidos}</strong></td>
+      <td>${c.dni}</td>
+      <td>${c.telefono}</td>
+      <td style="font-size:11px">${c.correo}</td>
+      <td>
+        <button class="btn btn-sec btn-sm" onclick="openClienteDetail('${c.id}')">Ver ficha</button>
+      </td>
+    </tr>
+  `).join('');
+  
+  if (!html) html = '<tr><td colspan="5" style="text-align:center;color:var(--txt2)">Sin resultados</td></tr>';
+  document.getElementById('tableClientes').innerHTML = html;
+}
+
+// ============= RENDER CITAS =============
+function renderCitasTable(data = DB.citas, page = 1, perPage = ITEMS_PER_PAGE) {
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const pageData = data.slice(start, end);
+  
+  let html = pageData.map(c => {
+    const cli = DB.clientes.find(cl => cl.id === c.cliente_id);
+    const estados = {pendiente: '⏳', en_progreso: '🔄', listo_entrega: '✓', entregado_pagado: '✅'};
+    return `
+    <tr>
+      <td><strong>${cli ? cli.nombre + ' ' + cli.apellidos : 'N/A'}</strong></td>
+      <td>${c.fecha_cita}</td>
+      <td><span class="badge" style="background:#3b82f6">${c.tipo_servicio}</span></td>
+      <td>${estados[c.estado] || c.estado}</td>
+      <td><small>${c.desde_booking ? '📲 Booking' : '🔧 CRM'}</small></td>
+      <td>
+        <button class="btn btn-sec btn-sm" onclick="openClienteDetail('${c.cliente_id}')">Ver cliente</button>
+      </td>
+    </tr>
+  `}).join('');
+  
+  if (!html) html = '<tr><td colspan="6" style="text-align:center;color:var(--txt2)">Sin resultados</td></tr>';
+  document.getElementById('tableCitas').innerHTML = html;
+}
+
+// ============= RENDER TAREAS =============
+function renderTareasTable(data = DB.tareas, page = 1, perPage = ITEMS_PER_PAGE) {
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const pageData = data.slice(start, end);
+  
+  let html = pageData.map(t => {
+    const cli = DB.clientes.find(c => c.id === t.cliente_id);
+    return `
+    <tr>
+      <td><strong>${cli ? cli.nombre + ' ' + cli.apellidos : 'N/A'}</strong></td>
+      <td>${t.descripcion}</td>
+      <td>${t.fecha_vencimiento}</td>
+      <td>${t.completada ? '✓ Completada' : '⏳ Pendiente'}</td>
+      <td>
+        <button class="btn btn-sec btn-sm" onclick="openClienteDetail('${t.cliente_id}')">Ver cliente</button>
+      </td>
+    </tr>
+  `}).join('');
+  
+  if (!html) html = '<tr><td colspan="5" style="text-align:center;color:var(--txt2)">Sin resultados</td></tr>';
+  document.getElementById('tableTareas').innerHTML = html;
+}
+
+// ============= PAGINACION =============
+function renderPagination(section, total, perPage, callback) {
+  const pages = Math.ceil(total / perPage);
+  const container = document.getElementById('pagination' + section.charAt(0).toUpperCase() + section.slice(1));
+  
+  if (pages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+  
+  let html = '<button onclick="' + callback.toString().match(/\{[\s\S]*\}/)[0] + '; window.currentPage.' + section + '=1; arguments[0](1)" class="btn btn-sec btn-sm">« Anterior</button>';
+  
+  for (let i = 1; i <= Math.min(pages, 10); i++) {
+    html += `<button class="btn btn-sec btn-sm" onclick="window.currentPage.${section}=${i}; arguments[0](${i})" style="background:${window.currentPage[section] === i ? '#3b82f6' : 'var(--bg3)'}">${i}</button>`;
+  }
+  
+  html += '<button onclick="window.currentPage.' + section + '=Math.ceil(' + total + '/' + perPage + '); arguments[0](window.currentPage.' + section + ')" class="btn btn-sec btn-sm">Siguiente »</button>';
+  html += `<span class="info" style="margin-left:auto">Página ${window.currentPage[section]} de ${pages}</span>`;
+  
+  container.innerHTML = html;
+}
+
+// ============= MODAL CLIENTE =============
+function openClienteDetail(clienteId) {
+  const cli = DB.clientes.find(c => c.id === clienteId);
+  if (!cli) return;
+  
+  const citas = DB.citas.filter(c => c.cliente_id === clienteId);
+  const motos = DB.motos.filter(m => m.cliente_id === clienteId);
+  const tareas = DB.tareas.filter(t => t.cliente_id === clienteId);
+  
+  const html = `
+    <div class="field">
+      <label>Nombre</label>
+      <strong>${cli.nombre} ${cli.apellidos}</strong>
+    </div>
+    <div class="field">
+      <label>DNI</label>
+      <strong>${cli.dni}</strong>
+    </div>
+    <div class="field">
+      <label>Teléfono</label>
+      <strong>${cli.telefono}</strong>
+    </div>
+    <div class="field">
+      <label>Correo</label>
+      <strong>${cli.correo}</strong>
+    </div>
+    <div class="field">
+      <label>Cliente desde</label>
+      <strong>${cli.fecha_creacion}</strong>
+    </div>
+    
+    <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;">
+      <h3 style="margin-bottom:12px">📊 Resumen</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+        <div><span style="color:var(--txt2)">Citas:</span> <strong>${citas.length}</strong></div>
+        <div><span style="color:var(--txt2)">Motos:</span> <strong>${motos.length}</strong></div>
+        <div><span style="color:var(--txt2)">Tareas:</span> <strong>${tareas.length}</strong></div>
+        <div><span style="color:var(--txt2)">Completadas:</span> <strong>${tareas.filter(t => t.completada).length}</strong></div>
+      </div>
+    </div>
+
+    ${motos.length > 0 ? `
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+        <h3 style="margin-bottom:12px">🏍️ Vehículos (${motos.length})</h3>
+        ${motos.slice(0, 3).map(m => `
+          <div style="background:var(--bg3);padding:10px;border-radius:6px;margin-bottom:8px;font-size:12px">
+            <strong>${m.marca} ${m.modelo}</strong><br>
+            <span style="color:var(--txt2)">Matrícula: ${m.matricula} | ${m.cilindrada}</span>
+          </div>
+        `).join('')}
+        ${motos.length > 3 ? `<p style="color:var(--txt2);font-size:12px">... y ${motos.length - 3} más</p>` : ''}
+      </div>
+    ` : ''}
+
+    ${citas.length > 0 ? `
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+        <h3 style="margin-bottom:12px">📅 Últimas Citas (${citas.length} total)</h3>
+        ${citas.slice(0, 3).map(c => `
+          <div style="background:var(--bg3);padding:10px;border-radius:6px;margin-bottom:8px;font-size:12px">
+            <strong>${c.fecha_cita}</strong> - <span class="badge" style="background:#3b82f6">${c.tipo_servicio}</span><br>
+            <span style="color:var(--txt2)">Estado: ${c.estado}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+  
+  document.getElementById('modalClienteContent').innerHTML = html;
+  document.getElementById('modalCliente').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ============= RENDER SECTION =============
+function renderSection(section) {
+  if (section === 'clientes') {
+    renderClientesTable(DB.clientes, 1, ITEMS_PER_PAGE);
+    renderPagination('clientes', DB.clientes.length, ITEMS_PER_PAGE, function(page) {
+      renderClientesTable(DB.clientes, page, ITEMS_PER_PAGE);
+    });
+  } else if (section === 'citas') {
+    renderCitasTable(DB.citas, 1, ITEMS_PER_PAGE);
+    renderPagination('citas', DB.citas.length, ITEMS_PER_PAGE, function(page) {
+      renderCitasTable(DB.citas, page, ITEMS_PER_PAGE);
+    });
+  } else if (section === 'tareas') {
+    renderTareasTable(DB.tareas, 1, ITEMS_PER_PAGE);
+    renderPagination('tareas', DB.tareas.length, ITEMS_PER_PAGE, function(page) {
+      renderTareasTable(DB.tareas, page, ITEMS_PER_PAGE);
+    });
+  }
+}
+
+// ============= INIT =============
+window.addEventListener('load', loadData);
+</script>
+</body>
+</html>
