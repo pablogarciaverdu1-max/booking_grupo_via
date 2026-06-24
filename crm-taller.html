@@ -923,13 +923,13 @@ function recQty(i,v){recState[i]=recState[i]||{checked:false};recState[i].qty=Ma
 function recReset(){recState={};renderClienteModal();}
 function recCalc(){let g=0;RECAMBIOS.forEach((r,i)=>{const st=recState[i]||{checked:false,qty:1};const t=st.checked?r.p*st.qty:0;g+=t;const el=document.getElementById('recTotal'+i);if(el)el.textContent='€'+t.toFixed(2);});const ge=document.getElementById('recGrand');if(ge)ge.textContent='€'+g.toFixed(2);}
 function tabTareas(c){
-  const ts=DB.tareas.byCliente(c.id);
+  const ts=DB.tareas.byCliente(c.id).filter(t=>!t.completada);
   return `<div class="tabpane active"><button class="btn" onclick="newTaskForm('${c.id}')">+ Nueva tarea</button>
     <div id="taskFormSlot"></div>
-    <table style="margin-top:14px"><thead><tr><th>Descripción</th><th>Vencimiento</th><th>Horario</th><th>Mecánico</th><th></th></tr></thead>
-    <tbody id="taskRows">${ts.map(t=>taskRow(t)).join('')||'<tr><td colspan="5" class="empty">Sin tareas</td></tr>'}</tbody></table></div>`;
+    <table style="margin-top:14px"><thead><tr><th>Descripción</th><th>Vencimiento</th><th>Horario</th><th>Mecánico</th><th>Cliente</th><th></th></tr></thead>
+    <tbody id="taskRows">${ts.map(t=>taskRow(t)).join('')||'<tr><td colspan="6" class="empty">Sin tareas</td></tr>'}</tbody></table></div>`;
 }
-function taskRow(t){return `<tr><td>${esc(t.descripcion)}</td><td>${t.fecha_vencimiento}</td><td>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</td><td>${mecName(t.mecanico_id)}</td><td><button class="btn btn-sm" onclick="editTaskForm('${t.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delTask('${t.id}','cli')">Eliminar</button></td></tr>`;}
+function taskRow(t){const c=cliById(t.cliente_id);return `<tr><td>${esc(t.descripcion)}</td><td>${t.fecha_vencimiento}</td><td>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</td><td>${mecName(t.mecanico_id)}</td><td style="color:#3b82f6;cursor:pointer;text-decoration:underline" onclick="openCliFicha('${t.cliente_id}')">${esc(cliFull(c))}</td><td><button class="btn btn-sm" onclick="editTaskForm('${t.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delTask('${t.id}','cli')">Eliminar</button></td></tr>`;}
 function taskFormHtml(cid,t){t=t||{};return `<div class="card" style="margin-top:12px">
   <div class="field"><label>Descripción *</label><input id="tfDesc" value="${esc(t.descripcion||'')}"></div>
   <div class="row2"><div class="field"><label>Fecha vencimiento *</label><input type="date" id="tfVenc" value="${t.fecha_vencimiento||today()}"></div>
@@ -1360,10 +1360,10 @@ function renderTaskCal(){
     h+=`<tr><td class="timecol">${hora}</td>`;
     days.forEach(d=>{
       const fecha=ymd(d);
-      const ts=tareas.filter(t=>t.fecha_vencimiento===fecha&&t.hora_inicio===hora);
+      const ts=tareas.filter(t=>t.fecha_vencimiento===fecha&&t.hora_inicio===hora&&!t.completada);
       h+='<td class="slot">';
-      ts.forEach(t=>{const style=t.completada?'background:#64748b;text-decoration:line-through':'background:#ef4444';
-        h+=`<div class="chip" style="${style}" onclick="showTask('${t.id}')">${esc(t.descripcion)} · ${mecName(t.mecanico_id)}</div>`;});
+      ts.forEach(t=>{const c=cliById(t.cliente_id);
+        h+=`<div class="chip" style="background:#ef4444" onclick="showTask('${t.id}')">${esc(cliFull(c))} · ${esc(t.descripcion)}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -1378,8 +1378,21 @@ function showTask(id){
     <div class="field"><label>Mecánico</label>${mecName(t.mecanico_id)}</div>
     <div class="field"><label>Horario</label>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</div>
     <div class="field"><label>Vencimiento</label>${t.fecha_vencimiento}</div>
-    <div class="field"><label>Estado</label>${t.completada?'Completada':'Pendiente'}</div>`;
+    <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" onclick="marcarTareaCompletada('${id}')">✓ Marcar completada</button>
+      <button class="btn btn-sec" onclick="closeModal('modalTask');openCliFicha('${t.cliente_id}')">Ver ficha cliente</button>
+    </div>`;
   openModal('modalTask');
+}
+function marcarTareaCompletada(id){
+  const t=DB.tareas.get(id);if(!t)return;
+  DB.tareas.update(id,{completada:true});
+  saveCitasDataToStorage();
+  closeModal('modalTask');
+  renderSeguimientos();
+  renderTaskCal();
+  toast('Tarea marcada como completada','ok');
 }
 
 /* ========= INFORMES ========= */
