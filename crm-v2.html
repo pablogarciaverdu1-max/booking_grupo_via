@@ -1374,16 +1374,16 @@ function renderTaskCal(){
 }
 function showTask(id){
   const t=DB.tareas.get(id);const c=cliById(t.cliente_id);
-  document.getElementById('taskBody').innerHTML=`<div class="field"><label>Tarea</label>${esc(t.descripcion)}</div>
+  const btnMarcar=document.createElement('button');btnMarcar.className='btn';btnMarcar.textContent='✓ Marcar completada';btnMarcar.addEventListener('click',()=>marcarTareaCompletada(id));
+  const btnFicha=document.createElement('button');btnFicha.className='btn btn-sec';btnFicha.textContent='Ver ficha cliente';btnFicha.addEventListener('click',()=>{closeModal('modalTask');openCliFicha(t.cliente_id);});
+  const divBody=document.createElement('div');divBody.innerHTML=`<div class="field"><label>Tarea</label>${esc(t.descripcion)}</div>
     <div class="field"><label>Cliente</label>${esc(cliFull(c))}</div>
     <div class="field"><label>Mecánico</label>${mecName(t.mecanico_id)}</div>
     <div class="field"><label>Horario</label>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</div>
     <div class="field"><label>Vencimiento</label>${t.fecha_vencimiento}</div>
-    <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn" onclick="marcarTareaCompletada('${id}')">✓ Marcar completada</button>
-      <button class="btn btn-sec" onclick="closeModal('modalTask');openCliFicha('${t.cliente_id}')">Ver ficha cliente</button>
-    </div>`;
+    <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>`;
+  const divBotones=document.createElement('div');divBotones.style.cssText='display:flex;gap:12px;margin-top:18px;flex-wrap:wrap';divBotones.appendChild(btnMarcar);divBotones.appendChild(btnFicha);
+  const taskBody=document.getElementById('taskBody');taskBody.innerHTML='';taskBody.appendChild(divBody);taskBody.appendChild(divBotones);
   openModal('modalTask');
 }
 function marcarTareaCompletada(id){
