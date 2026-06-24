@@ -1677,12 +1677,12 @@ function loadDemoData(){
       motos=data.motos;
       citas=data.citas;
       tareas=data.tareas;
-      saveCitasDataToStorage();
+      syncCitasToStorage();
       populateFilters();
       renderCal();
-      renderKanban();
-      renderClientes();
-      renderSeguimientos();
+      try{renderKanban();}catch(e){}
+      try{renderClientes();}catch(e){}
+      try{renderSeguimientos();}catch(e){}
       toast('✓ Demo cargado: 5,000 clientes, 25K citas, 10K tareas','ok');
     })
     .catch(err=>toast('Error cargando demo: '+err.message,'err'));
