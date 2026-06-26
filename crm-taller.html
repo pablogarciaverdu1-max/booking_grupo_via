@@ -525,15 +525,15 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
 /* ========= CALENDAR (CITAS) ========= */
 let calBaseDate=new Date();
 function mondayOf(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
-function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
+function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4,5].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function calWeek(n){calBaseDate.setDate(calBaseDate.getDate()+n*7);renderCal();}
 function calToday(){calBaseDate=new Date();renderCal();}
 function renderCal(){
   const days=weekDays(calBaseDate);
   const mecFiltro=document.getElementById('filtroMecanico')?.value||'';
-  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
-  const dnames=['Lun','Mar','Mié','Jue','Vie'];
+  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[5].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+  const dnames=['Lun','Mar','Mié','Jue','Vie','Sab'];
   // Build skip map: di -> set of hora strings spanned by a multi-slot cita
   const skip=days.map((d,di)=>{
     const fecha=ymd(d);const s=new Set();
@@ -825,22 +825,21 @@ function tabDatos(c){return `<div class="tabpane active" style="max-width:560px"
   <div class="field"><label>Teléfono</label><input id="edTel" value="${esc(c.telefono)}"></div></div>
   <div class="field"><label>Correo</label><input id="edCorreo" value="${esc(c.correo||'')}"></div>
   <div class="field" style="padding:12px;background:#f0f9ff;border-left:3px solid #3b82f6;border-radius:4px;margin:16px 0">
-    <label style="display:flex;align-items:center;gap:8px;font-weight:600;color:#1e40af;cursor:pointer;margin:0">
-      <input id="edGDPR" type="checkbox" ${c.aceptado_gdpr?'checked':''} style="margin:0">
+    <label style="display:flex;align-items:center;gap:8px;font-weight:600;color:#1e40af;cursor:default;margin:0">
+      <input id="edGDPR" type="checkbox" ${c.aceptado_gdpr?'checked':''} disabled style="margin:0;cursor:default">
       <span>✓ Aceptó Política de Privacidad RGPD ${c.fecha_aceptacion_gdpr?'<small style="color:#0d47a1">('+c.fecha_aceptacion_gdpr.split('T')[0]+')</small>':''}</span>
     </label>
+    <small style="color:#0d47a1;display:block;margin-top:4px">ⓘ Estado desde booking - Solo se actualiza cuando cliente acepta en formulario</small>
   </div>
   <button class="btn" onclick="saveDatos()">Guardar</button></div>`;}
 function saveDatos(){
   const nombre=document.getElementById('edNombre').value.trim();const correo=document.getElementById('edCorreo').value.trim();
   const tel=document.getElementById('edTel').value.trim();const dni=document.getElementById('edDni').value.trim();
   const apellidos=document.getElementById('edApellidos').value.trim();
-  const aceptado_gdpr=document.getElementById('edGDPR').checked;
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  const updateData={nombre,apellidos,dni,telefono:tel,correo,aceptado_gdpr};
-  if(aceptado_gdpr)updateData.fecha_aceptacion_gdpr=today();
+  const updateData={nombre,apellidos,dni,telefono:tel,correo};
   DB.clientes.update(curCliente,updateData);
   curTab='datos';
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
@@ -1647,9 +1646,9 @@ function acceptSolicitud(rid){
   // Create client (or find existing by phone)
   let cliId=null;
   const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
-  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});}
+  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});if(!existing.aceptado_gdpr&&r.aceptado_gdpr)DB.clientes.update(cliId,{aceptado_gdpr:r.aceptado_gdpr,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr});}
   else{
-    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||''});
+    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||'',aceptado_gdpr:r.aceptado_gdpr||false,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr||null});
     cliId=nc.id;
   }
   // Use the CRM service key stored directly by booking.html, fallback to map
