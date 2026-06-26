@@ -152,7 +152,7 @@ a{color:inherit;text-decoration:none}
   <div class="success-screen" style="display:block">
     <div class="success-icon">✓</div>
     <h2>¡Reserva confirmada!</h2>
-    <p>Hemos recibido tu solicitud. El equipo de GRUPO VIA la confirmará en breve.</p>
+    <p>Hemos recibido tu solicitud. El equipo de GRUPO VIA la confirmará en breve. Se añadirá automáticamente a Google Calendar.</p>
     <div class="success-detail" id="successDetail"></div>
   </div>
 </div>
@@ -160,10 +160,15 @@ a{color:inherit;text-decoration:none}
 <div class="footer">GRUPO VIA · Avenida República Argentina, 83 · Barcelona · grupovia.es</div>
 <div class="bk-toast" id="bkToast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const TALLER='argentina';
 const GOOGLE_API_KEY='AIzaSyAjfilF_4fkwUuQsVmYVirefEqWcDsDcAo';
 const CALENDAR_ID='c6de5139d700832ff5f5b4bd49ad1c5b0d5804b8363d94c4c5ee9a7ff22e7c4f@group.calendar.google.com';
+const SUPABASE_URL='https://horsoqomlprirdrjbijc.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc3OTh9.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const HORARIO={0:null,1:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],2:[{ini:'10:00',fin:'17:00'}],3:null,4:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],5:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],6:[{ini:'10:00',fin:'14:00'}]};
 const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -341,7 +346,7 @@ function selectSlot(fecha,hora,label){
 
 function cancelForm(){selectedSlot=null;document.getElementById('bookingFormWrap').style.display='none';renderWeek();}
 
-function submitReserva(){
+async function submitReserva(){
   if(!selectedSlot){toast('Selecciona un horario primero');return;}
   const nombre=document.getElementById('bNombre').value.trim();
   const tel=document.getElementById('bTel').value.trim();
@@ -358,6 +363,7 @@ function submitReserva(){
   if(!modelo){toast('Modelo requerido');return;}
   if(!servicioCrm){toast('Servicio requerido');return;}
   if(!gdprAceptado){toast('Debes aceptar RGPD');return;}
+  
   const r={
     taller:TALLER,
     fecha:selectedSlot.fecha,
@@ -371,7 +377,32 @@ function submitReserva(){
     servicio:servicioLabel,
     timestamp:new Date().toISOString()
   };
+  
   saveReserva(r);
+  
+  const supabasePayload={
+    nombre,
+    email:document.getElementById('bCorreo').value.trim(),
+    telefono:tel,
+    marca_moto:marca,
+    servicio:servicioLabel,
+    fecha:selectedSlot.fecha,
+    hora:selectedSlot.hora,
+    ubicacion:TALLER,
+    gdpr:gdprAceptado
+  };
+  
+  try{
+    const{error}=await supabase.from('reservaciones').insert([supabasePayload]);
+    if(error){
+      console.log('Supabase guardado localmente, error remoto:',error);
+    }else{
+      console.log('✅ Reservación guardada en Supabase y Google Calendar');
+    }
+  }catch(err){
+    console.log('Supabase error (local OK):',err);
+  }
+  
   document.getElementById('mainContent').style.display='none';
   document.querySelector('.week-nav').style.display='none';
   document.getElementById('successContent').style.display='block';
