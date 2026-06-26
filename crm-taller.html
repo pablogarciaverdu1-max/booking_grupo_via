@@ -355,7 +355,7 @@ tr.clickable:hover{background:var(--bg3)}
 
 <script>
 /* ========= CONSTANTS ========= */
-const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
+const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','Can-Am','CF Moto','Daelim','Derbi','Ducati','Fantic','Gas Gas','Gilera','Harley-Davidson','Hero','Honda','Husqvarna','Kawasaki','Keeway','KTM','Kymco','Lifan','Moto Guzzi','Piaggio','Qingqi','Rebel','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Sym','Triumph','Vespa','Voge','Yamaha','Zontes','Otra'];
 const CILINDRADAS = ['50cc','80cc','125cc','150cc','200cc','250cc','300cc','350cc','390cc','400cc','450cc','500cc','600cc','650cc','700cc','750cc','800cc','850cc','900cc','1000cc','1100cc','1200cc','1300cc','1400cc+'];
 const SEDES = [{id:'s1',nombre:'Sede 1'},{id:'s2',nombre:'Sede 2'}];
 const MECANICOS = [
@@ -742,7 +742,7 @@ function wizFinish(){
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
   DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
+  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();saveCRMData();toast('Cita creada','ok');
 }
 
 /* ========= CLIENTES LIST ========= */
@@ -843,6 +843,7 @@ function saveDatos(){
   const updateData={nombre,apellidos,dni,telefono:tel,correo};
   DB.clientes.update(curCliente,updateData);
   syncClienteToSupabase(curCliente);
+  saveCRMData();
   curTab='datos';
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
@@ -1768,7 +1769,28 @@ async function syncCitaToSupabase(citaId){
   }catch(err){console.log('Error sync cita:',err);}
 }
 
-seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+// ─── LOAD FROM LOCALSTORAGE ────────────────────────────────
+function loadCRMData(){
+  try{
+    const saved=localStorage.getItem('crm_data');
+    if(saved){
+      const data=JSON.parse(saved);
+      clientes=data.clientes||[];
+      motos=data.motos||[];
+      citas=data.citas||[];
+      tareas=data.tareas||[];
+      ordenes=data.ordenes||[];
+      servicios_facturados=data.servicios_facturados||[];
+      if(clientes.length>0)return;
+    }
+  }catch{}
+  seed();
+}
+function saveCRMData(){
+  try{localStorage.setItem('crm_data',JSON.stringify({clientes,motos,citas,tareas,ordenes,servicios_facturados}));}catch(e){console.log('Error saving:',e);}
+}
+
+loadCRMData();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();saveCRMData();},15000);
 </script>
 </body>
 </html>
