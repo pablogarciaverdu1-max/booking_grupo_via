@@ -1,0 +1,9 @@
+id,cliente_id,marca,modelo,cilindrada,matricula,bastidor,kilometros,anotaciones
+mot1,id1,Honda,CBR 600,600cc,1234ABC,VIN001,15000,"[{""id"":""anot1"",""texto"":""Cliente solicita revisión de frenos"",""fecha"":""2025-05-01""}]"
+mot2,id1,Yamaha,MT-07,700cc,5678DEF,VIN002,18000,"[]"
+mot3,id2,Kawasaki,Z900,900cc,9012GHI,VIN003,25000,"[{""id"":""anot2"",""texto"":""Cambio de aceite cada 5000km"",""fecha"":""2025-04-10""}]"
+mot4,id2,Vespa,Primavera,125cc,3456JKL,VIN004,5000,"[]"
+mot5,id3,BMW,R 1250 GS,1300cc,7890MNO,VIN005,32000,"[]"
+mot6,id4,Ducati,Monster,900cc,2345PQR,VIN006,12000,"[{""id"":""anot3"",""texto"":""Ruido en transmisión"",""fecha"":""2025-05-20""}]"
+mot7,id4,KTM,Duke 390,390cc,6789STU,VIN007,8000,"[]"
+mot8,id5,Suzuki,GSX-R 750,750cc,0123VWX,VIN008,22000,"[]"

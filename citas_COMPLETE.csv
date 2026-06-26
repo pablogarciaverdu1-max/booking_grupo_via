@@ -1,0 +1,11 @@
+id,cliente_id,moto_id,fecha_cita,hora_cita,hora_fin,tipo_servicio,estado,mecanico_id,nota,desde_booking,taller,fecha_creacion
+cit1,id1,mot1,2025-06-26,09:00,10:00,mantenimiento,pendiente,m1,Revisión 10000km,false,madrid,2025-06-20
+cit2,id1,mot2,2025-06-28,11:30,12:30,itv,en_progreso,m2,Preparar ITV,false,madrid,2025-06-21
+cit3,id2,mot3,2025-06-27,16:00,17:00,reparacion,pendiente,m3,Cambio embrague,true,argentina,2025-06-22
+cit4,id2,mot4,2025-06-29,08:30,09:30,mantenimiento,pendiente,m6,Primera revisión,false,argentina,2025-06-19
+cit5,id3,mot5,2025-06-30,10:00,11:30,siniestro,en_progreso,m7,Daño lateral,false,madrid,2025-06-20
+cit6,id3,mot5,2025-06-24,12:00,13:00,mantenimiento,listo_entrega,m4,,false,madrid,2025-06-18
+cit7,id4,mot6,2025-06-23,14:00,15:00,reparacion,entregado_pagado,m5,Transmisión,false,argentina,2025-06-17
+cit8,id4,mot7,2025-07-02,09:30,10:30,itv,pendiente,m8,,true,argentina,2025-06-23
+cit9,id5,mot8,2025-06-21,15:30,16:30,mantenimiento,entregado_pagado,m9,,false,madrid,2025-06-15
+cit10,id5,mot8,2025-07-03,13:00,14:00,mantenimiento,pendiente,m10,,true,madrid,2025-06-24
