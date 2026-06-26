@@ -311,7 +311,7 @@ function isPast(fecha,slotTime){
   if(fecha>today)return false;
   const nowMins=now.getHours()*60+now.getMinutes();
   const slotMins=toMins(slotTime);
-  return slotMins<(nowMins+360);
+  return slotMins<(nowMins+720);
 }
 
 function formatCorreo(el){
