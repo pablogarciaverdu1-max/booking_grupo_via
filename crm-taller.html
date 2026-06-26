@@ -1773,17 +1773,19 @@ async function syncCitaToSupabase(citaId){
 function loadCRMData(){
   try{
     const saved=localStorage.getItem('crm_data');
-    if(saved){
+    if(saved && saved.length>10){
       const data=JSON.parse(saved);
-      clientes=data.clientes||[];
-      motos=data.motos||[];
-      citas=data.citas||[];
-      tareas=data.tareas||[];
-      ordenes=data.ordenes||[];
-      servicios_facturados=data.servicios_facturados||[];
-      if(clientes.length>0)return;
+      if(data.clientes && data.clientes.length>0){
+        clientes=data.clientes;
+        motos=data.motos||[];
+        citas=data.citas||[];
+        tareas=data.tareas||[];
+        ordenes=data.ordenes||[];
+        servicios_facturados=data.servicios_facturados||[];
+        return;
+      }
     }
-  }catch{}
+  }catch(e){console.log('Error loading from localStorage:',e);}
   seed();
 }
 function saveCRMData(){
