@@ -1725,7 +1725,8 @@ function rejectSolicitud(rid){
 // ─── SUPABASE CONFIG ────────────────────────────────────────
 const SUPABASE_URL='https://horsoqomlprirdrjbijc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
-const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+if(!window.supabaseClient){window.supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);}
+const supabase=window.supabaseClient;
 
 // ─── SYNC CLIENT TO SUPABASE ────────────────────────────────
 async function syncClienteToSupabase(cid){
