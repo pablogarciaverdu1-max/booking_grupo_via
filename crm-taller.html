@@ -1509,6 +1509,8 @@ function syncCitasToStorage(){
     hora_fin:c.hora_fin||addMinsStr(c.hora_cita,30)
   }));
   try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
+  try{localStorage.setItem('gv_ocupados_madrid',JSON.stringify(ocupados));}catch(e){}
+  try{localStorage.setItem('gv_ocupados_argentina',JSON.stringify(ocupados));}catch(e){}
 }
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
@@ -1523,7 +1525,12 @@ function copiarLinkCitas(){
 
 function checkSolicitudes(){
   let list=[];
-  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  try{
+    const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+    const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+    const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+    list=[...list1,...list2,...list3];
+  }catch{}
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const badge=document.getElementById('navBadge');
   if(badge){
@@ -1550,7 +1557,12 @@ function renderSolicitudes(pending){
 
 function openModalSolicitudes(){
   let list=[];
-  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  try{
+    const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+    const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+    const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+    list=[...list1,...list2,...list3];
+  }catch{}
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const DIAS_N=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const MESES_N=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -1605,13 +1617,24 @@ function toggleSolRow(rid){
 }
 
 function acceptSolicitud(rid){
-  let list=[];
-  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  let list=[],sourceTaller=null;
+  try{
+    const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+    const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+    const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+    const r1=list1.find(x=>x.id===rid);
+    const r2=list2.find(x=>x.id===rid);
+    const r3=list3.find(x=>x.id===rid);
+    if(r1){list=list1;sourceTaller='reservas';}
+    else if(r2){list=list2;sourceTaller='madrid';}
+    else if(r3){list=list3;sourceTaller='argentina';}
+  }catch{}
   const r=list.find(x=>x.id===rid);
   if(!r||r.estado!=='pendiente_confirmacion')return; // guard doble clic
   // Mark FIRST to prevent duplicate processing
   r.estado='confirmada';
-  localStorage.setItem('gv_reservas',JSON.stringify(list));
+  const key='gv_'+(sourceTaller==='reservas'?'reservas':(sourceTaller==='madrid'?'reservas_madrid':'reservas_argentina'));
+  localStorage.setItem(key,JSON.stringify(list));
   // Create client (or find existing by phone)
   let cliId=null;
   const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
@@ -1645,7 +1668,13 @@ function acceptSolicitud(rid){
   // Refresh solicitudes modal if open, close it when no more pending
   const solModal=document.getElementById('modalSolicitudes');
   if(solModal&&solModal.classList.contains('open')){
-    const remaining=JSON.parse(localStorage.getItem('gv_reservas')||'[]').filter(x=>x.estado==='pendiente_confirmacion');
+    let remaining=[];
+    try{
+      const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+      const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+      const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+      remaining=[...list1,...list2,...list3].filter(x=>x.estado==='pendiente_confirmacion');
+    }catch{}
     if(remaining.length===0){closeModal('modalSolicitudes');}
     else{openModalSolicitudes();}
   }
@@ -1659,10 +1688,22 @@ function acceptSolicitud(rid){
 
 function rejectSolicitud(rid){
   confirmDelete('¿Rechazar esta solicitud?',()=>{
-    let list=[];
-    try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
-    const r=list.find(x=>x.id===rid);if(r)r.estado='rechazada';
-    localStorage.setItem('gv_reservas',JSON.stringify(list));
+    let list=[],sourceTaller=null;
+    try{
+      const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+      const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+      const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+      const r1=list1.find(x=>x.id===rid);
+      const r2=list2.find(x=>x.id===rid);
+      const r3=list3.find(x=>x.id===rid);
+      if(r1){list=list1;sourceTaller='reservas';}
+      else if(r2){list=list2;sourceTaller='madrid';}
+      else if(r3){list=list3;sourceTaller='argentina';}
+    }catch{}
+    const r=list.find(x=>x.id===rid);
+    if(r)r.estado='rechazada';
+    const key='gv_'+(sourceTaller==='reservas'?'reservas':(sourceTaller==='madrid'?'reservas_madrid':'reservas_argentina'));
+    localStorage.setItem(key,JSON.stringify(list));
     checkSolicitudes();
     toast('Solicitud rechazada','warn');
   });
