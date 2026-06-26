@@ -225,6 +225,13 @@ a{color:inherit;text-decoration:none}
 const TALLER='madrid';
 const TALLER_NOMBRE='Avenida Madrid, 80';
 
+// ─── GOOGLE CALENDAR CONFIG ────────────────────────────────
+const GOOGLE_API_KEY='AIzaSyAjfilF_4fkwUuQsVmYVirefEqWcDsDcAo';
+const CALENDAR_ID='f2fae0a29264f73774edfc63b2c3e7f95be91e066f68672081142e7ce831174f@group.calendar.google.com';
+const SUPABASE_URL='https://horsoqomlprirdrjbijc.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc3OTh9.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 // ─── HORARIO ────────────────────────────────────────────────
 const HORARIO={
   0:null,
@@ -276,6 +283,33 @@ function saveReserva(r){
   list.push(r);
   localStorage.setItem('gv_reservas_'+TALLER,JSON.stringify(list));
   syncToSupabase(r);
+}
+
+// ─── GOOGLE CALENDAR FUNCTIONS ────────────────────────────
+let calendarEventsCache={};
+
+async function getCalendarEvents(dateStr){
+  try{
+    const d=new Date(dateStr);
+    const startOfDay=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0);
+    const endOfDay=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59);
+    const timeMin=startOfDay.toISOString();
+    const timeMax=endOfDay.toISOString();
+    const response=await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}`);
+    if(!response.ok)return[];
+    const data=await response.json();
+    return data.items||[];
+  }catch(err){
+    console.error('Error fetching calendar:',err);
+    return[];
+  }
+}
+
+async function loadCalendarForDate(fecha){
+  if(!calendarEventsCache[fecha]){
+    calendarEventsCache[fecha]=await getCalendarEvents(fecha);
+  }
+  return calendarEventsCache[fecha];
 }
 
 // ─── SLOT LOGIC ─────────────────────────────────────────────
