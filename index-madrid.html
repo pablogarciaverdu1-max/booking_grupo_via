@@ -295,19 +295,32 @@ function generateSlots(date){
   return result;
 }
 
+let calendarEventsCache={};
+
+async function loadCalendarForDate(fecha){
+  if(!calendarEventsCache[fecha]){
+    calendarEventsCache[fecha]=await getCalendarEvents(fecha);
+  }
+  return calendarEventsCache[fecha];
+}
+
 function isOccupied(fecha,slotTime){
-  const ocupados=getOcupados();
   const pendientes=getPendientes().filter(p=>p.fecha===fecha);
   const si=toMins(slotTime);
   const sf=si+SLOT_MIN;
   const overlap=(oIni,oFin)=>si<oFin&&sf>oIni;
-  if(ocupados.some(o=>{
-    if(o.fecha!==fecha)return false;
-    const oi=toMins(o.hora_ini);
-    const of_=toMins(o.hora_fin||addMins(o.hora_ini,30));
-    return overlap(oi,of_);
-  }))return true;
+
   if(pendientes.some(p=>overlap(toMins(p.hora),toMins(p.hora)+SLOT_MIN)))return true;
+
+  // Verificar contra eventos de Google Calendar en caché
+  const events=calendarEventsCache[fecha]||[];
+  for(let evt of events){
+    const start=new Date(evt.start?.dateTime||evt.start?.date);
+    const end=new Date(evt.end?.dateTime||evt.end?.date);
+    const evtStart=start.getHours()*60+start.getMinutes();
+    const evtEnd=end.getHours()*60+end.getMinutes();
+    if(overlap(evtStart,evtEnd))return true;
+  }
   return false;
 }
 
@@ -338,12 +351,20 @@ function changeWeek(n){
   renderWeek();
 }
 
-function renderWeek(){
+async function renderWeek(){
   const monday=getMondayOf(baseDate);
   const days=weekDays(monday);
   const d0=days[0],d6=days[6];
   document.getElementById('weekLabel').textContent=
     `${d0.getDate()} ${MESES[d0.getMonth()]} – ${d6.getDate()} ${MESES[d6.getMonth()]} ${d6.getFullYear()}`;
+
+  // Precargar eventos de Google Calendar para la semana
+  for(let d of days){
+    const fecha=dateStr(d);
+    if(!calendarEventsCache[fecha]){
+      await loadCalendarForDate(fecha);
+    }
+  }
 
   const today=dateStr(new Date());
   let html='';
@@ -513,65 +534,52 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+// ─── GOOGLE CALENDAR CONFIG ────────────────────────────────
+const GOOGLE_API_KEY='AIzaSyAjfilF_4fkwUuQsVmYVirefEqWcDsDcAo';
+const CALENDAR_ID='f2fae0a29264f73774edfc63b2c3e7f95be91e066f68672081142e7ce831174f@group.calendar.google.com';
+
 // ─── SUPABASE CONFIG ────────────────────────────────────────
 const SUPABASE_URL='https://horsoqomlprirdrjbijc.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc3OTh9.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
 const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// ─── FETCH GOOGLE CALENDAR EVENTS ──────────────────────────
+async function getCalendarEvents(dateStr){
+  try{
+    const d=new Date(dateStr);
+    const startOfDay=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0);
+    const endOfDay=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59);
+    const timeMin=startOfDay.toISOString();
+    const timeMax=endOfDay.toISOString();
+
+    const response=await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}`);
+    if(!response.ok)return[];
+    const data=await response.json();
+    return data.items||[];
+  }catch(err){
+    console.error('Error fetching calendar:',err);
+    return[];
+  }
+}
 
 // ─── SYNC TO SUPABASE ───────────────────────────────────────
 async function syncToSupabase(r){
   try{
-    const{data:cliente,error:errCliente}=await supabase.from('clientes').select('id').eq('telefono',r.telefono).single();
+    const reservacion={
+      nombre:r.nombre,
+      email:r.correo||'',
+      telefono:r.telefono,
+      marca_moto:r.moto_marca,
+      servicio:r.servicio,
+      fecha:r.fecha,
+      hora:r.hora,
+      ubicacion:TALLER,
+      gdpr:r.aceptado_gdpr||false
+    };
 
-    let cliId;
-    if(!cliente){
-      const{data:newCliente,error:errNew}=await supabase.from('clientes').insert([{
-        id:r.id,
-        nombre:r.nombre,
-        apellidos:r.apellidos||'',
-        dni:r.dni||'',
-        telefono:r.telefono,
-        correo:r.correo||'',
-        aceptado_gdpr:r.aceptado_gdpr||false,
-        fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr?r.fecha_aceptacion_gdpr.split('T')[0]:null,
-        fecha_creacion:new Date().toISOString().split('T')[0]
-      }]).select();
-      if(errNew){console.log('Error crear cliente:',errNew);return;}
-      cliId=newCliente[0].id;
-    }else{
-      cliId=cliente.id;
-    }
-
-    const{error:errMoto}=await supabase.from('motos').insert([{
-      id:'mot_'+r.id,
-      cliente_id:cliId,
-      marca:r.marca||'',
-      modelo:r.modelo||'',
-      cilindrada:'',
-      matricula:r.matricula||'',
-      bastidor:'',
-      kilometros:0,
-      anotaciones:JSON.stringify([])
-    }]);
-
-    const{error:errCita}=await supabase.from('citas').insert([{
-      id:r.id,
-      cliente_id:cliId,
-      moto_id:'mot_'+r.id,
-      fecha_cita:r.fecha_cita||new Date().toISOString().split('T')[0],
-      hora_cita:r.hora_cita||'09:00',
-      hora_fin:r.hora_fin||'10:00',
-      tipo_servicio:r.tipo_servicio||'mantenimiento',
-      estado:'pendiente_confirmacion',
-      mecanico_id:'auto',
-      nota:r.descripcion||'',
-      desde_booking:true,
-      taller:r.taller||'madrid',
-      fecha_creacion:new Date().toISOString().split('T')[0]
-    }]);
-
-    if(errMoto||errCita){console.log('Error datos:',errMoto,errCita);return;}
-    console.log('✅ Sincronizado con Supabase');
+    const{data,error}=await supabase.from('reservaciones').insert([reservacion]).select();
+    if(error){console.log('Error Supabase:',error);return;}
+    console.log('✅ Reservación guardada:',data[0].id);
   }catch(err){
     console.log('Error sync:',err);
   }
