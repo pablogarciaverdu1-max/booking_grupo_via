@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GRUPO VIA · Reserva tu cita - Avenida República Argentina</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
@@ -275,6 +276,71 @@ function saveReserva(r){
   const list=getPendientes();
   list.push(r);
   localStorage.setItem('gv_reservas_'+TALLER,JSON.stringify(list));
+  syncToSupabase(r);
+}
+
+// ─── SUPABASE CONFIG ────────────────────────────────────────
+const SUPABASE_URL='https://horsoqomlprirdrjbijc.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// ─── SYNC TO SUPABASE ───────────────────────────────────────
+async function syncToSupabase(r){
+  try{
+    const{data:cliente,error:errCliente}=await supabase.from('clientes').select('id').eq('telefono',r.telefono).single();
+
+    let cliId;
+    if(!cliente){
+      const{data:newCliente,error:errNew}=await supabase.from('clientes').insert([{
+        id:r.id,
+        nombre:r.nombre,
+        apellidos:r.apellidos||'',
+        dni:r.dni||'',
+        telefono:r.telefono,
+        correo:r.correo||'',
+        aceptado_gdpr:r.aceptado_gdpr||false,
+        fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr?r.fecha_aceptacion_gdpr.split('T')[0]:null,
+        fecha_creacion:new Date().toISOString().split('T')[0]
+      }]).select();
+      if(errNew){console.log('Error crear cliente:',errNew);return;}
+      cliId=newCliente[0].id;
+    }else{
+      cliId=cliente.id;
+    }
+
+    const{error:errMoto}=await supabase.from('motos').insert([{
+      id:'mot_'+r.id,
+      cliente_id:cliId,
+      marca:r.marca||'',
+      modelo:r.modelo||'',
+      cilindrada:'',
+      matricula:r.matricula||'',
+      bastidor:'',
+      kilometros:0,
+      anotaciones:JSON.stringify([])
+    }]);
+
+    const{error:errCita}=await supabase.from('citas').insert([{
+      id:r.id,
+      cliente_id:cliId,
+      moto_id:'mot_'+r.id,
+      fecha_cita:r.fecha_cita||new Date().toISOString().split('T')[0],
+      hora_cita:r.hora_cita||'09:00',
+      hora_fin:r.hora_fin||'10:00',
+      tipo_servicio:r.tipo_servicio||'mantenimiento',
+      estado:'pendiente_confirmacion',
+      mecanico_id:'auto',
+      nota:r.descripcion||'',
+      desde_booking:true,
+      taller:r.taller||'argentina',
+      fecha_creacion:new Date().toISOString().split('T')[0]
+    }]);
+
+    if(errMoto||errCita){console.log('Error datos:',errMoto,errCita);return;}
+    console.log('✅ Sincronizado con Supabase');
+  }catch(err){
+    console.log('Error sync:',err);
+  }
 }
 
 // ─── SLOT LOGIC ─────────────────────────────────────────────
