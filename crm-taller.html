@@ -824,15 +824,24 @@ function tabDatos(c){return `<div class="tabpane active" style="max-width:560px"
   <div class="row2"><div class="field"><label>DNI</label><input id="edDni" value="${esc(c.dni||'')}"></div>
   <div class="field"><label>Teléfono</label><input id="edTel" value="${esc(c.telefono)}"></div></div>
   <div class="field"><label>Correo</label><input id="edCorreo" value="${esc(c.correo||'')}"></div>
+  <div class="field" style="padding:12px;background:#f0f9ff;border-left:3px solid #3b82f6;border-radius:4px;margin:16px 0">
+    <label style="display:flex;align-items:center;gap:8px;font-weight:600;color:#1e40af;cursor:pointer;margin:0">
+      <input id="edGDPR" type="checkbox" ${c.aceptado_gdpr?'checked':''} style="margin:0">
+      <span>✓ Aceptó Política de Privacidad RGPD ${c.fecha_aceptacion_gdpr?'<small style="color:#0d47a1">('+c.fecha_aceptacion_gdpr.split('T')[0]+')</small>':''}</span>
+    </label>
+  </div>
   <button class="btn" onclick="saveDatos()">Guardar</button></div>`;}
 function saveDatos(){
   const nombre=document.getElementById('edNombre').value.trim();const correo=document.getElementById('edCorreo').value.trim();
   const tel=document.getElementById('edTel').value.trim();const dni=document.getElementById('edDni').value.trim();
   const apellidos=document.getElementById('edApellidos').value.trim();
+  const aceptado_gdpr=document.getElementById('edGDPR').checked;
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  DB.clientes.update(curCliente,{nombre,apellidos,dni,telefono:tel,correo});
+  const updateData={nombre,apellidos,dni,telefono:tel,correo,aceptado_gdpr};
+  if(aceptado_gdpr)updateData.fecha_aceptacion_gdpr=today();
+  DB.clientes.update(curCliente,updateData);
   curTab='datos';
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }

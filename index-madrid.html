@@ -196,6 +196,12 @@ a{color:inherit;text-decoration:none}
         </select>
       </div>
       <div class="field"><label>Descripción (opcional)</label><textarea id="bDesc" rows="3" placeholder="Cuéntanos brevemente qué le pasa a tu moto..."></textarea></div>
+      <div style="margin-top:16px;padding:12px;background:#f0f9ff;border-left:4px solid #3b82f6;border-radius:4px">
+        <label style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:#1e40af;font-weight:400;cursor:pointer">
+          <input id="bGDPR" type="checkbox" style="margin-top:2px;cursor:pointer" required>
+          <span>Acepto la <strong>Política de Privacidad</strong> y autorizo el tratamiento de mis datos conforme a RGPD. Entiendo que GRUPO VIA utilizará mis datos para contactarme sobre esta cita y futuros servicios.</span>
+        </label>
+      </div>
       <button class="submit-btn" onclick="submitReserva()">Confirmar reserva</button>
       <button class="cancel-btn" onclick="cancelForm()">Cancelar y elegir otro horario</button>
     </div>
@@ -449,12 +455,14 @@ function submitReserva(){
   const modelo=document.getElementById('bModelo').value.trim();
   const servicioCrm=document.getElementById('bServicio').value;
   const servicioLabel=document.getElementById('bServicio').options[document.getElementById('bServicio').selectedIndex]?.text||'';
+  const gdprAceptado=document.getElementById('bGDPR').checked;
   if(!nombre){toast('Escribe tu nombre completo');return;}
   if(!tel||tel.length<9){toast('Teléfono inválido');return;}
   if(!dni){toast('Escribe tu DNI / NIF');return;}
   if(!marca){toast('Selecciona la marca de tu moto');return;}
   if(!modelo){toast('Escribe el modelo de tu moto');return;}
   if(!servicioCrm){toast('Selecciona el servicio solicitado');return;}
+  if(!gdprAceptado){toast('Debes aceptar la Política de Privacidad RGPD');return;}
 
   const r={
     id:uid(),
@@ -476,6 +484,8 @@ function submitReserva(){
     descripcion:document.getElementById('bDesc').value.trim(),
     tipo:'primera_visita',
     estado:'pendiente_confirmacion',
+    aceptado_gdpr:gdprAceptado,
+    fecha_aceptacion_gdpr:new Date().toISOString(),
     timestamp:nowStr()
   };
 
