@@ -13,9 +13,9 @@ declare
 begin
   -- Determinar el calendar ID según la ubicación
   if new.ubicacion = 'madrid' then
-    calendar_id := 'pablogarciaverdu1@gmail.com';
+    calendar_id := 'f2fae0a29264f73774edfc63b2c3e7f95be91e066f68672081142e7ce831174f@group.calendar.google.com';
   elsif new.ubicacion = 'argentina' then
-    calendar_id := 'pabletegv@gmail.com';
+    calendar_id := 'c6de5139d700832ff5f5b4bd49ad1c5b0d5804b8363d94c4c5ee9a7ff22e7c4f@group.calendar.google.com';
   else
     raise exception 'Ubicación inválida: %', new.ubicacion;
   end if;

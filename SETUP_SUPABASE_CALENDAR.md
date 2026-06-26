@@ -55,7 +55,9 @@ Una vez que la Edge Function funciona, actualizar:
 - Verifica que:
   - Las cuentas de Google compartieron sus calendarios con `grupo-via@grupo-via.iam.gserviceaccount.com`
   - La variable `GOOGLE_SERVICE_ACCOUNT` está correctamente guardada
-  - Los Calendar IDs son correctos (`pablogarciaverdu1@gmail.com` y `pabletegv@gmail.com`)
+  - Los Calendar IDs son correctos:
+    - Madrid: `f2fae0a29264f73774edfc63b2c3e7f95be91e066f68672081142e7ce831174f@group.calendar.google.com`
+    - Argentina: `c6de5139d700832ff5f5b4bd49ad1c5b0d5804b8363d94c4c5ee9a7ff22e7c4f@group.calendar.google.com`
 
 **Error: "Event created but failed to update reservation"**
 - El evento se creó pero la Edge Function no pudo guardar el ID
