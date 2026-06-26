@@ -5,7 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GRUPO VIA - CRM Taller</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <style>
 :root{
   --bg:#0b0d14;        /* fondo base: azul noche muy oscuro */
@@ -355,7 +354,7 @@ tr.clickable:hover{background:var(--bg3)}
 
 <script>
 /* ========= CONSTANTS ========= */
-const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','Can-Am','CF Moto','Daelim','Derbi','Ducati','Fantic','Gas Gas','Gilera','Harley-Davidson','Hero','Honda','Husqvarna','Kawasaki','Keeway','KTM','Kymco','Lifan','Moto Guzzi','Piaggio','Qingqi','Rebel','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Sym','Triumph','Vespa','Voge','Yamaha','Zontes','Otra'];
+const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
 const CILINDRADAS = ['50cc','80cc','125cc','150cc','200cc','250cc','300cc','350cc','390cc','400cc','450cc','500cc','600cc','650cc','700cc','750cc','800cc','850cc','900cc','1000cc','1100cc','1200cc','1300cc','1400cc+'];
 const SEDES = [{id:'s1',nombre:'Sede 1'},{id:'s2',nombre:'Sede 2'}];
 const MECANICOS = [
@@ -742,7 +741,7 @@ function wizFinish(){
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
   DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();saveCRMData();toast('Cita creada','ok');
+  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
 /* ========= CLIENTES LIST ========= */
@@ -842,8 +841,6 @@ function saveDatos(){
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
   const updateData={nombre,apellidos,dni,telefono:tel,correo};
   DB.clientes.update(curCliente,updateData);
-  syncClienteToSupabase(curCliente);
-  saveCRMData();
   curTab='datos';
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
@@ -1649,11 +1646,10 @@ function acceptSolicitud(rid){
   // Create client (or find existing by phone)
   let cliId=null;
   const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
-  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});if(!existing.aceptado_gdpr&&r.aceptado_gdpr)DB.clientes.update(cliId,{aceptado_gdpr:r.aceptado_gdpr,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr});syncClienteToSupabase(cliId);}
+  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});if(!existing.aceptado_gdpr&&r.aceptado_gdpr)DB.clientes.update(cliId,{aceptado_gdpr:r.aceptado_gdpr,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr});}
   else{
     const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||'',aceptado_gdpr:r.aceptado_gdpr||false,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr||null});
     cliId=nc.id;
-    syncClienteToSupabase(cliId);
   }
   // Use the CRM service key stored directly by booking.html, fallback to map
   const srvMap={'Mantenimiento / Revisión':'mantenimiento','Reparación':'reparacion','Siniestro / Golpe':'siniestro','ITV / Puesta a punto':'itv','Primera visita / Consulta':'mantenimiento'};
@@ -1669,9 +1665,8 @@ function acceptSolicitud(rid){
     motoId=moto.id;
   }
   // Create cita from booking - mark with desde_booking flag
-  const cita=DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true});
+  DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||'',desde_booking:true});
   syncCitasToStorage();
-  syncCitaToSupabase(cita.id);
   // Reset filter to show all mechanics
   document.getElementById('filtroMecanico').value='';
   // Navigate calendar to the week of the new cita
@@ -1722,78 +1717,7 @@ function rejectSolicitud(rid){
   });
 }
 
-// ─── SUPABASE CONFIG ────────────────────────────────────────
-const SUPABASE_URL='https://horsoqomlprirdrjbijc.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
-if(!window.supabaseClient){window.supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);}
-const supabase=window.supabaseClient;
-
-// ─── SYNC CLIENT TO SUPABASE ────────────────────────────────
-async function syncClienteToSupabase(cid){
-  try{
-    const c=DB.clientes.get(cid);
-    if(!c)return;
-    const{error}=await supabase.from('clientes').upsert({
-      id:c.id,
-      nombre:c.nombre,
-      apellidos:c.apellidos||'',
-      dni:c.dni||'',
-      telefono:c.telefono,
-      correo:c.correo||'',
-      aceptado_gdpr:c.aceptado_gdpr||false,
-      fecha_aceptacion_gdpr:c.fecha_aceptacion_gdpr||null
-    });
-    if(!error)console.log('✅ Cliente sincronizado');
-  }catch(err){console.log('Error sync cliente:',err);}
-}
-
-// ─── SYNC CITA TO SUPABASE ──────────────────────────────────
-async function syncCitaToSupabase(citaId){
-  try{
-    const cita=DB.citas.get(citaId);
-    if(!cita)return;
-    const{error}=await supabase.from('citas').upsert({
-      id:cita.id,
-      cliente_id:cita.cliente_id,
-      moto_id:cita.moto_id||'',
-      fecha_cita:cita.fecha||new Date().toISOString().split('T')[0],
-      hora_cita:cita.hora||'09:00',
-      hora_fin:cita.horaFin||'10:00',
-      tipo_servicio:cita.tipo||'mantenimiento',
-      estado:cita.estado||'pendiente',
-      mecanico_id:cita.mecanico_id||'auto',
-      nota:cita.nota||'',
-      desde_booking:cita.desde_booking||false,
-      taller:cita.taller||'madrid'
-    });
-    if(!error)console.log('✅ Cita sincronizada');
-  }catch(err){console.log('Error sync cita:',err);}
-}
-
-// ─── LOAD FROM LOCALSTORAGE ────────────────────────────────
-function loadCRMData(){
-  try{
-    const saved=localStorage.getItem('crm_data');
-    if(saved && saved.length>10){
-      const data=JSON.parse(saved);
-      if(data.clientes && data.clientes.length>0){
-        clientes=data.clientes;
-        motos=data.motos||[];
-        citas=data.citas||[];
-        tareas=data.tareas||[];
-        ordenes=data.ordenes||[];
-        servicios_facturados=data.servicios_facturados||[];
-        return;
-      }
-    }
-  }catch(e){console.log('Error loading from localStorage:',e);}
-  seed();
-}
-function saveCRMData(){
-  try{localStorage.setItem('crm_data',JSON.stringify({clientes,motos,citas,tareas,ordenes,servicios_facturados}));}catch(e){console.log('Error saving:',e);}
-}
-
-loadCRMData();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();saveCRMData();},15000);
+seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 </script>
 </body>
 </html>
