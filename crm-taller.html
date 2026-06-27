@@ -548,6 +548,8 @@ function renderCal(){
         const bgColor=isBooking?'#a855f7':sv.color;
         const citaLabel=`${esc(cliFull(cl))} · ${sv.label}`;
         h+=`<div class="chip" style="background:${bgColor};${chipH}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
+      const ts=tareas.filter(t=>t.fecha===fecha&&t.hora_inicio===hora);
+      ts.forEach(t=>{h+=`<div class="chip" style="background:#8b5cf6;font-size:11px;padding:4px 6px;cursor:pointer;border:1px solid #7c3aed" onclick="event.stopPropagation();showTareaDetailCal('${t.id}')" title="${esc(t.titulo)}">📝 ${esc(t.titulo.substring(0,20))}${t.titulo.length>20?'...':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -948,6 +950,18 @@ function seleccionarEditTareaCliente(id,nombre){window.editTareaClienteSeleccion
 function guardarEditarTarea(){const id=document.getElementById('editTareaResultadosId');const t=tareas.find(x=>x.id===id);if(!t)return;const titulo=document.getElementById('editTareaTitulo').value.trim();const fecha=document.getElementById('editTareaFecha').value;const horaIni=document.getElementById('editTareaHora').value;const horaFin=document.getElementById('editTareaHoraFin').value;const desc=document.getElementById('editTareaDesc').value.trim();const estado=document.getElementById('editTareaEstado').value;if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}t.titulo=titulo;t.cliente_id=window.editTareaClienteSeleccionadoId||null;t.fecha=fecha;t.hora_inicio=horaIni;t.hora_fin=horaFin;t.descripcion=desc;t.estado=estado;saveToLocalStorage();syncTareaToSupabase(t);closeModal('modalEditarTarea');renderClienteModal();toast('Tarea actualizada','ok');}
 function deleteTarea(id){confirmDelete('¿Eliminar esta tarea?',()=>{tareas=tareas.filter(t=>t.id!==id);saveToLocalStorage();renderClienteModal();toast('Tarea eliminada','warn');});}
 async function syncTareaToSupabase(t){try{if(!window.supabase_client)throw new Error('Supabase no disponible');const{error}=await window.supabase_client.from('tareas').upsert({id:t.id,titulo:t.titulo,cliente_id:t.cliente_id,fecha:t.fecha,hora_inicio:t.hora_inicio,hora_fin:t.hora_fin,descripcion:t.descripcion,estado:t.estado,fecha_creacion:t.fecha_creacion},'id');if(error)throw error;console.log('✅ Tarea sincronizada a Supabase');}catch(e){console.warn('⚠️ No pude sincronizar tarea a Supabase:',e.message);saveToLocalStorage();}}
+function showTareaDetailCal(id){const t=tareas.find(x=>x.id===id);if(!t)return;const cliente=t.cliente_id?clientes.find(c=>c.id===t.cliente_id):null;const modalBody=`<div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+<div><label style="font-weight:700;color:var(--txt2);font-size:12px">TÍTULO</label><div style="font-size:16px;font-weight:600;color:var(--accent);margin-top:6px">${esc(t.titulo)}</div></div>
+<div><label style="font-weight:700;color:var(--txt2);font-size:12px">CLIENTE</label><div style="font-size:14px;margin-top:6px">${cliente?`<a href="#" onclick="event.preventDefault();openClienteFicha('${cliente.id}');closeModal('modalTareaDetail')" style="color:var(--accent-blue);text-decoration:underline">${esc(cliFull(cliente))}</a>`:'<span style="color:var(--txt2)">Sin cliente asignado</span>'}</div></div>
+<div><label style="font-weight:700;color:var(--txt2);font-size:12px">FECHA Y HORA</label><div style="font-size:14px;margin-top:6px">📅 ${t.fecha} · ⏰ ${t.hora_inicio}-${t.hora_fin}</div></div>
+<div><label style="font-weight:700;color:var(--txt2);font-size:12px">DESCRIPCIÓN</label><div style="font-size:14px;margin-top:6px;padding:10px;background:var(--bg3);border-radius:6px;border-left:3px solid var(--accent)">${t.descripcion?esc(t.descripcion):'<span style="color:var(--txt2)">Sin descripción</span>'}</div></div>
+<div><label style="font-weight:700;color:var(--txt2);font-size:12px">ESTADO</label><div style="font-size:14px;margin-top:6px"><span style="padding:4px 8px;border-radius:4px;background:${t.estado==='completada'?'#22c55e33':'#3b82f633'};color:${t.estado==='completada'?'#22c55e':'#3b82f6'};font-weight:600">${t.estado==='completada'?'✓ Completada':'Pendiente'}</span></div></div>
+<div style="display:flex;gap:8px;margin-top:12px">
+  <button class="btn" onclick="abrirEditarTarea('${t.id}');closeModal('modalTareaDetail')" style="flex:1">Editar</button>
+  <button class="btn btn-danger" onclick="deleteTarea('${t.id}');closeModal('modalTareaDetail')" style="flex:1">Eliminar</button>
+</div>
+</div>`;const modal=document.getElementById('modalTareaDetail')||document.createElement('div');modal.id='modalTareaDetail';modal.className='modal-bg';modal.innerHTML=`<div class="modal"><div class="modal-head"><h2>Detalle de Tarea</h2><button class="x" onclick="closeModal('modalTareaDetail')">×</button></div>${modalBody}</div>`;if(!document.getElementById('modalTareaDetail')){document.body.appendChild(modal);}openModal('modalTareaDetail');}
+function openClienteFicha(id){const c=DB.clientes.get(id);if(!c){toast('Cliente no encontrado','err');return;}curTab='datos';renderClienteModal();}
 /* ORDEN DE TRABAJO TAB */
 const SERVICIOS_GALERIA=[
   {id:'sg_aceite',icon:'🛢',nombre:'Cambio de aceite y filtro',precio:45,iva:21},
