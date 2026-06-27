@@ -1662,18 +1662,25 @@ function loadFromLocalStorage(){
 async function loadFromSupabase(){
   try{
     if(!window.supabase_client) throw new Error('Supabase not available');
-    const{data:clientes_data}=await window.supabase_client.from('clientes').select('*');
-    const{data:motos_data}=await window.supabase_client.from('motos').select('*');
-    const{data:citas_data}=await window.supabase_client.from('citas').select('*');
-    if(clientes_data) clientes=clientes_data;
-    if(motos_data) motos=motos_data;
-    if(citas_data) citas=citas_data;
+    const{data:clientes_data, error:err1}=await window.supabase_client.from('clientes').select('*');
+    const{data:motos_data, error:err2}=await window.supabase_client.from('motos').select('*');
+    const{data:citas_data, error:err3}=await window.supabase_client.from('citas').select('*');
+
+    // Si hay error en Supabase, fallar
+    if(err1 || err2 || err3) throw new Error('Supabase query error');
+
+    // Si no hay datos de Supabase, intentar fallback
+    if(!clientes_data || !motos_data || !citas_data) throw new Error('No data from Supabase');
+
+    clientes=clientes_data;
+    motos=motos_data;
+    citas=citas_data;
     saveToLocalStorage();
     SYNC_ENABLED=true;
-    console.log('☁️ Datos cargados desde Supabase');
+    console.log('☁️ Datos cargados desde Supabase (exitoso):', {clientes:clientes.length, motos:motos.length, citas:citas.length});
     return true;
   }catch(err){
-    console.warn('⚠️ Supabase no disponible, intentando localStorage...');
+    console.warn('⚠️ Supabase no disponible:', err.message, '→ intentando localStorage...');
     return false;
   }
 }
