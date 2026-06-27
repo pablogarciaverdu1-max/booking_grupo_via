@@ -1700,20 +1700,28 @@ async function loadFromSupabase(){
 /* ========= INIT ========= */
 (async()=>{
   console.log('🚀 Iniciando CRM...');
-  const fromSupabase = await loadFromSupabase();
-  console.log('📊 fromSupabase:', fromSupabase);
-  if(!fromSupabase){
-    console.log('🔄 Intentando cargar de localStorage...');
-    const fromStorage = loadFromLocalStorage();
-    console.log('📊 fromStorage:', fromStorage);
-    if(!fromStorage){
-      console.log('🌱 Cargando seed (datos de prueba)...');
-      seed();
-      saveToLocalStorage();
-    }
+
+  // CARGAR INMEDIATAMENTE desde localStorage o seed (SIN esperar a Supabase)
+  console.log('🔄 Cargando desde localStorage...');
+  const fromStorage = loadFromLocalStorage();
+  if(!fromStorage){
+    console.log('🌱 Cargando seed (datos de prueba)...');
+    seed();
+    saveToLocalStorage();
   }
-  console.log('✅ Datos cargados. Total: clientes=', clientes.length, 'motos=', motos.length, 'citas=', citas.length);
+  console.log('✅ CRM listo. Total: clientes=', clientes.length, 'motos=', motos.length, 'citas=', citas.length);
+
+  // Renderizar AL INSTANTE
   populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+
+  // SUPABASE en background (sin bloquear)
+  console.log('☁️ Intentando sincronizar con Supabase en background...');
+  loadFromSupabase().then(success => {
+    if(success){
+      console.log('✅ Supabase conectó. Actualizando vista...');
+      renderCal();renderClientes();renderKanban();
+    }
+  });
 })();
 </script>
 </body>
