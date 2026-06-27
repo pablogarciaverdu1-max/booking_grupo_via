@@ -363,7 +363,7 @@ const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){for(let m=0;m<60;m+=15){a.
 
 /* ========= IN-MEMORY DATA ========= */
 let clientes=[], motos=[], citas=[], ordenes=[], servicios_facturados=[];
-let _id=1; const uid=()=>'id'+(_id++);
+const uid=()=>{const s4=()=>Math.floor((1+Math.random())*0x10000).toString(16).substring(1);return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;}
 let ordenCounter=1;
 
 function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
