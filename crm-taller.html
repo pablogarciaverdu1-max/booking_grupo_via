@@ -1632,10 +1632,14 @@ async function syncCitaToSupabase(c){
 
 /* ========= LOCALSTORAGE PERSISTENCE ========= */
 function saveToLocalStorage(){
-  localStorage.setItem('crm_clientes_backup',JSON.stringify(clientes));
-  localStorage.setItem('crm_motos_backup',JSON.stringify(motos));
-  localStorage.setItem('crm_citas_backup',JSON.stringify(citas));
-  console.log('💾 Datos guardados en localStorage');
+  try{
+    localStorage.setItem('crm_clientes_backup',JSON.stringify(clientes));
+    localStorage.setItem('crm_motos_backup',JSON.stringify(motos));
+    localStorage.setItem('crm_citas_backup',JSON.stringify(citas));
+    console.log('💾 Datos guardados en localStorage', {clientes:clientes.length, motos:motos.length, citas:citas.length});
+  }catch(e){
+    console.error('❌ Error guardando localStorage:',e.message);
+  }
 }
 
 function loadFromLocalStorage(){
@@ -1643,12 +1647,14 @@ function loadFromLocalStorage(){
     const c=JSON.parse(localStorage.getItem('crm_clientes_backup')||'[]');
     const m=JSON.parse(localStorage.getItem('crm_motos_backup')||'[]');
     const ci=JSON.parse(localStorage.getItem('crm_citas_backup')||'[]');
+    console.log('📂 Datos en localStorage:', {clientes:c.length, motos:m.length, citas:ci.length});
     if(c.length>0||m.length>0||ci.length>0){
       clientes=c;motos=m;citas=ci;
-      console.log('📂 Datos cargados desde localStorage');
+      console.log('✅ Datos cargados desde localStorage', {clientes:clientes.length, motos:motos.length, citas:citas.length});
       return true;
     }
-  }catch(e){console.error('Error cargando localStorage:',e);}
+    console.log('❌ localStorage vacío');
+  }catch(e){console.error('❌ Error cargando localStorage:',e);}
   return false;
 }
 
@@ -1674,11 +1680,19 @@ async function loadFromSupabase(){
 
 /* ========= INIT ========= */
 (async()=>{
+  console.log('🚀 Iniciando CRM...');
   const fromSupabase = await loadFromSupabase();
+  console.log('📊 fromSupabase:', fromSupabase);
   if(!fromSupabase){
+    console.log('🔄 Intentando cargar de localStorage...');
     const fromStorage = loadFromLocalStorage();
-    if(!fromStorage) seed();
+    console.log('📊 fromStorage:', fromStorage);
+    if(!fromStorage){
+      console.log('🌱 Cargando seed (datos de prueba)...');
+      seed();
+    }
   }
+  console.log('✅ Datos cargados. Total: clientes=', clientes.length, 'motos=', motos.length, 'citas=', citas.length);
   populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 })();
 </script>
