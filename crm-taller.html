@@ -1662,19 +1662,31 @@ function loadFromLocalStorage(){
 async function loadFromSupabase(){
   try{
     if(!window.supabase_client) throw new Error('Supabase not available');
-    const{data:clientes_data, error:err1}=await window.supabase_client.from('clientes').select('*');
-    const{data:motos_data, error:err2}=await window.supabase_client.from('motos').select('*');
-    const{data:citas_data, error:err3}=await window.supabase_client.from('citas').select('*');
 
-    // Si hay error en Supabase, fallar
-    if(err1 || err2 || err3) throw new Error('Supabase query error');
+    // Timeout de 3 segundos para no esperar eternamente
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Supabase timeout')), 3000)
+    );
 
-    // Si no hay datos de Supabase, intentar fallback
-    if(!clientes_data || !motos_data || !citas_data) throw new Error('No data from Supabase');
+    const loadPromise = (async () => {
+      const{data:clientes_data, error:err1}=await window.supabase_client.from('clientes').select('*');
+      const{data:motos_data, error:err2}=await window.supabase_client.from('motos').select('*');
+      const{data:citas_data, error:err3}=await window.supabase_client.from('citas').select('*');
 
-    clientes=clientes_data;
-    motos=motos_data;
-    citas=citas_data;
+      // Si hay error en Supabase, fallar
+      if(err1 || err2 || err3) throw new Error('Supabase query error');
+
+      // Si no hay datos de Supabase, intentar fallback
+      if(!clientes_data || !motos_data || !citas_data) throw new Error('No data from Supabase');
+
+      return {clientes:clientes_data, motos:motos_data, citas:citas_data};
+    })();
+
+    const result = await Promise.race([loadPromise, timeoutPromise]);
+
+    clientes=result.clientes;
+    motos=result.motos;
+    citas=result.citas;
     saveToLocalStorage();
     SYNC_ENABLED=true;
     console.log('☁️ Datos cargados desde Supabase (exitoso):', {clientes:clientes.length, motos:motos.length, citas:citas.length});
