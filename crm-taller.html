@@ -1697,6 +1697,7 @@ async function loadFromSupabase(){
     if(!fromStorage){
       console.log('🌱 Cargando seed (datos de prueba)...');
       seed();
+      saveToLocalStorage();
     }
   }
   console.log('✅ Datos cargados. Total: clientes=', clientes.length, 'motos=', motos.length, 'citas=', citas.length);
