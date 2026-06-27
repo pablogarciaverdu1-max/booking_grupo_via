@@ -810,15 +810,15 @@ function tabMotos(c){
     h+=`<div class="moto-compact" onclick="toggleMotoExpand('${m.id}')" style="cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:all 0.2s">
       <div style="font-weight:600;font-size:14px;color:var(--accent);margin-bottom:4px">${esc(m.marca+' '+m.modelo)}</div>
       <div style="font-size:12px;color:var(--txt2)">${esc(m.matricula)}</div>
-      ${expanded?`<div class="moto-detail" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
-        <div class="row2" style="margin-bottom:10px"><div class="field" style="margin:0"><label style="font-size:12px">Marca</label><select id="mo_marca_${m.id}" style="font-size:12px;padding:6px">${opts(MARCAS_MOTO,m.marca)}</select></div>
-        <div class="field" style="margin:0"><label style="font-size:12px">Modelo</label><input id="mo_modelo_${m.id}" value="${esc(m.modelo)}" style="font-size:12px;padding:6px"></div></div>
-        <div class="row2" style="margin-bottom:10px"><div class="field" style="margin:0"><label style="font-size:12px">Cilindrada</label><select id="mo_cil_${m.id}" style="font-size:12px;padding:6px">${opts(CILINDRADAS,m.cilindrada)}</select></div>
-        <div class="field" style="margin:0"><label style="font-size:12px">Matrícula</label><input id="mo_mat_${m.id}" value="${esc(m.matricula)}" style="font-size:12px;padding:6px"></div></div>
-        <div class="field" style="margin-bottom:10px"><label style="font-size:12px">Bastidor</label><input id="mo_bas_${m.id}" value="${esc(m.bastidor||'')}" style="font-size:12px;padding:6px;width:100%"></div>
+      ${expanded?`<div class="moto-detail" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px" onclick="event.stopPropagation()">
+        <div class="row2" style="margin-bottom:10px"><div class="field" style="margin:0"><label style="font-size:12px">Marca</label><select id="mo_marca_${m.id}" style="font-size:12px;padding:6px" onclick="event.stopPropagation()">${opts(MARCAS_MOTO,m.marca)}</select></div>
+        <div class="field" style="margin:0"><label style="font-size:12px">Modelo</label><input id="mo_modelo_${m.id}" value="${esc(m.modelo)}" style="font-size:12px;padding:6px" onclick="event.stopPropagation()"></div></div>
+        <div class="row2" style="margin-bottom:10px"><div class="field" style="margin:0"><label style="font-size:12px">Cilindrada</label><select id="mo_cil_${m.id}" style="font-size:12px;padding:6px" onclick="event.stopPropagation()">${opts(CILINDRADAS,m.cilindrada)}</select></div>
+        <div class="field" style="margin:0"><label style="font-size:12px">Matrícula</label><input id="mo_mat_${m.id}" value="${esc(m.matricula)}" style="font-size:12px;padding:6px" onclick="event.stopPropagation()"></div></div>
+        <div class="field" style="margin-bottom:10px"><label style="font-size:12px">Bastidor</label><input id="mo_bas_${m.id}" value="${esc(m.bastidor||'')}" style="font-size:12px;padding:6px;width:100%" onclick="event.stopPropagation()"></div>
         <div style="font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:6px">Anotaciones</div>
         <div style="font-size:11px;margin-bottom:8px;max-height:80px;overflow-y:auto">${(m.anotaciones||[]).map(a=>`<div style="margin-bottom:4px"><span style="color:var(--txt2)">${a.fecha}</span>: ${esc(a.texto)}</div>`).join('')||'<div class="empty">Sin anotaciones</div>'}</div>
-        <textarea id="mo_nota_${m.id}" rows="1" placeholder="Nueva nota..." style="font-size:11px;padding:6px;width:100%;margin-bottom:8px"></textarea>
+        <textarea id="mo_nota_${m.id}" rows="1" placeholder="Nueva nota..." style="font-size:11px;padding:6px;width:100%;margin-bottom:8px" onclick="event.stopPropagation()"></textarea>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="event.stopPropagation();addAnot('${m.id}')" style="font-size:11px;padding:6px 10px">Nota</button>
           <button class="btn btn-sm" onclick="event.stopPropagation();saveMoto('${m.id}')" style="font-size:11px;padding:6px 10px">Guardar</button>
