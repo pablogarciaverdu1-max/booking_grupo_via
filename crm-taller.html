@@ -327,7 +327,7 @@ tr.clickable:hover{background:var(--bg3)}
 const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
 window.supabase_client = null;
-if(typeof window.supabase !== 'undefined') window.supabase_client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if(typeof window.supabase !== 'undefined'){window.supabase_client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);console.log('✅ Supabase inicializado');}else{console.warn('⚠️ Librería Supabase no cargó');}
 let SYNC_ENABLED = false;
 
 /* ========= CONSTANTS ========= */
@@ -1583,9 +1583,9 @@ function rejectSolicitud(rid){
 }
 
 /* ========= SYNC FUNCTIONS ========= */
-async function syncClienteToSupabase(c){try{if(!window.supabase_client)return;await window.supabase_client.from('clientes').upsert({id:c.id,nombre:c.nombre,apellidos:c.apellidos,dni:c.dni,correo:c.correo||'',telefono:c.telefono||'',fecha_creacion:c.fecha_creacion},'id');}catch(e){}}
-async function syncMotoToSupabase(m){try{if(!window.supabase_client)return;await window.supabase_client.from('motos').upsert({id:m.id,cliente_id:m.cliente_id,marca:m.marca,modelo:m.modelo,cilindrada:m.cilindrada||'',matricula:m.matricula||'',bastidor:m.bastidor||''},'id');}catch(e){}}
-async function syncCitaToSupabase(c){try{if(!window.supabase_client)return;await window.supabase_client.from('citas').upsert({id:c.id,cliente_id:c.cliente_id,moto_id:c.moto_id,tipo_servicio:c.tipo_servicio,fecha_cita:c.fecha_cita,hora_cita:c.hora_cita,hora_fin:c.hora_fin||null,mecanico_id:c.mecanico_id||'',nota:c.nota||'',estado:c.estado,fecha_creacion:c.fecha_creacion},'id');}catch(e){}}
+async function syncClienteToSupabase(c){try{if(!window.supabase_client){console.warn('⚠️ Supabase no inicializado');return;}const{error}=await window.supabase_client.from('clientes').upsert({id:c.id,nombre:c.nombre,apellidos:c.apellidos,dni:c.dni,correo:c.correo||'',telefono:c.telefono||'',fecha_creacion:c.fecha_creacion},'id');if(error)console.error('❌ Error sync cliente:',error);else console.log('✅ Cliente sincronizado:',c.nombre);}catch(e){console.error('❌ Error:',e.message);}}
+async function syncMotoToSupabase(m){try{if(!window.supabase_client){console.warn('⚠️ Supabase no inicializado');return;}const{error}=await window.supabase_client.from('motos').upsert({id:m.id,cliente_id:m.cliente_id,marca:m.marca,modelo:m.modelo,cilindrada:m.cilindrada||'',matricula:m.matricula||'',bastidor:m.bastidor||''},'id');if(error)console.error('❌ Error sync moto:',error);else console.log('✅ Moto sincronizada:',m.marca);}catch(e){console.error('❌ Error:',e.message);}}
+async function syncCitaToSupabase(c){try{if(!window.supabase_client){console.warn('⚠️ Supabase no inicializado');return;}const{error}=await window.supabase_client.from('citas').upsert({id:c.id,cliente_id:c.cliente_id,moto_id:c.moto_id,tipo_servicio:c.tipo_servicio,fecha_cita:c.fecha_cita,hora_cita:c.hora_cita,hora_fin:c.hora_fin||null,mecanico_id:c.mecanico_id||'',nota:c.nota||'',estado:c.estado,fecha_creacion:c.fecha_creacion},'id');if(error)console.error('❌ Error sync cita:',error);else console.log('✅ Cita sincronizada');}catch(e){console.error('❌ Error:',e.message);}}
 
 /* ========= SUPABASE LOAD ========= */
 async function loadFromSupabase(){
