@@ -679,9 +679,13 @@ function wizNext(){
     const nombre=document.getElementById('wnNombre').value.trim();
     const tel=document.getElementById('wnTel').value.trim();const dni=document.getElementById('wnDni').value.trim();
     if(!nombre){toast('El nombre es obligatorio','err');return;}
-    if(DB.clientes.existsByPhoneOrDni(tel,dni)){toast('Ya existe un cliente con ese teléfono/DNI','err');return;}
-    const c=DB.clientes.create({nombre,apellidos:document.getElementById('wnApellidos').value.trim(),telefono:tel,dni,correo:''});syncClienteToSupabase(c);
-    wiz.clienteId=c.id;wiz.step=3;renderWizard();renderClientes();
+    // Crear cliente nuevo SIEMPRE (sin validar duplicados)
+    const c=DB.clientes.create({nombre,apellidos:document.getElementById('wnApellidos').value.trim(),telefono:tel,dni,correo:''});
+    console.log('✅ Cliente nuevo creado:', {id:c.id, nombre:c.nombre});
+    syncClienteToSupabase(c);
+    wiz.clienteId=c.id;
+    console.log('✅ wiz.clienteId asignado a:', wiz.clienteId);
+    wiz.step=3;renderWizard();renderClientes();
   } else if(wiz.step===3){
     const ms=DB.motos.byCliente(wiz.clienteId);
     const formEl=document.getElementById('wMotoForm');
@@ -729,7 +733,7 @@ function renderClientes(){
   }).map(c=>{
     const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
     const ult=cs[0];
-    return `<tr class="clickable" onclick="openCliente('${c.id}')"><td><b>${esc(cliFull(c))}</b></td><td>${esc(c.telefono)}</td><td>${esc(c.dni||'')}</td><td>${cs.length}</td><td>${ult?ult.fecha_cita:'—'}</td><td>${ult?estadoBadge(ult.estado):'—'}</td><td><button class="btn btn-sm" onclick="event.stopPropagation();openCliente('${c.id}')">Ver</button></td></tr>`;
+    return `<tr class="clickable" onclick="openCliente('${c.id}')"><td><b>${esc(cliFull(c))}</b></td><td>${esc(c.telefono)}</td><td>${esc(c.dni||'')}</td><td>${cs.length}</td><td>${ult?ult.fecha_cita:'—'}</td><td>${ult?estadoBadge(ult.estado):'—'}</td><td style="display:flex;gap:6px"><button class="btn btn-sm" onclick="event.stopPropagation();openCliente('${c.id}')">Ver</button><button class="btn btn-sm" style="background:#ef4444;color:#fff" onclick="event.stopPropagation();deleteCliente('${c.id}')">Eliminar</button></td></tr>`;
   }).join('');
   document.getElementById('cliTbody').innerHTML=rows||'<tr><td colspan="7" class="empty">Sin clientes</td></tr>';
 }
@@ -1241,6 +1245,30 @@ function deleteCitaKanban(id){
     toast('Cita eliminada','warn');
   });
 }
+
+function deleteCliente(id){
+  const c=DB.clientes.get(id);
+  if(!c)return;
+  const ms=DB.motos.byCliente(id);
+  const cs=DB.citas.byCliente(id);
+  const msg=`¿Eliminar cliente "${esc(cliFull(c))}"?\n\nEsto eliminará:\n• El cliente\n• ${ms.length} moto(s)\n• ${cs.length} cita(s)\n\nEsta acción no se puede deshacer.`;
+  confirmDelete(msg,()=>{
+    // Eliminar todas las citas del cliente
+    cs.forEach(cita=>DB.citas.delete(cita.id));
+    // Eliminar todas las motos del cliente
+    ms.forEach(moto=>DB.motos.delete(moto.id));
+    // Eliminar el cliente
+    DB.clientes.delete(id);
+    saveToLocalStorage();
+    // Si el modal está abierto, cerrarlo
+    if(document.getElementById('modalCliente').classList.contains('open')){
+      closeModal('modalCliente');
+    }
+    renderClientes();renderCal();renderKanban();
+    toast('Cliente y datos asociados eliminados','warn');
+  });
+}
+
 function kCardDetail(id){
   const c=DB.citas.get(id);
   curCliente=c.cliente_id;curTab='citas';recState={};
@@ -1712,7 +1740,7 @@ async function loadFromSupabase(){
   console.log('✅ CRM listo. Total: clientes=', clientes.length, 'motos=', motos.length, 'citas=', citas.length);
 
   // Renderizar AL INSTANTE
-  populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+  populateFilters();renderCal();renderClientes();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 
   // SUPABASE en background (sin bloquear)
   console.log('☁️ Intentando sincronizar con Supabase en background...');
