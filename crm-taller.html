@@ -184,6 +184,7 @@ tr.clickable:hover{background:var(--bg3)}
 .funnel-bar:hover{filter:brightness(1.2)}
 .funnel-arrow{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;margin:0 auto}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="light">
 
@@ -322,6 +323,13 @@ tr.clickable:hover{background:var(--bg3)}
 <div id="toasts"></div>
 
 <script>
+/* ========= SUPABASE ========= */
+const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+let supabase = null;
+if(window.supabase) supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let SYNC_ENABLED = false;
+
 /* ========= CONSTANTS ========= */
 const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
 const CILINDRADAS = ['50cc','80cc','125cc','150cc','200cc','250cc','300cc','350cc','390cc','400cc','450cc','500cc','600cc','650cc','700cc','750cc','800cc','850cc','900cc','1000cc','1100cc','1200cc','1300cc','1400cc+'];
@@ -1574,7 +1582,30 @@ function rejectSolicitud(rid){
   });
 }
 
-seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+/* ========= SUPABASE LOAD ========= */
+async function loadFromSupabase(){
+  try{
+    if(!supabase) throw new Error('Supabase not available');
+    const{data:clientes_data}=await supabase.from('clientes').select('*');
+    const{data:motos_data}=await supabase.from('motos').select('*');
+    const{data:citas_data}=await supabase.from('citas').select('*');
+    if(clientes_data) clientes=clientes_data;
+    if(motos_data) motos=motos_data;
+    if(citas_data) citas=citas_data;
+    SYNC_ENABLED=true;
+    return true;
+  }catch(err){
+    console.log('Usando seed local');
+    return false;
+  }
+}
+
+/* ========= INIT ========= */
+(async()=>{
+  const loaded = await loadFromSupabase();
+  if(!loaded) seed();
+  populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+})();
 </script>
 </body>
 </html>
