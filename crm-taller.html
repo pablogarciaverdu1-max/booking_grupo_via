@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<!-- VERSION: 1.28 -->
+<!-- VERSION: 1.27 -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -184,7 +184,6 @@ tr.clickable:hover{background:var(--bg3)}
 .funnel-bar:hover{filter:brightness(1.2)}
 .funnel-arrow{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;margin:0 auto}
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="light">
 
@@ -323,15 +322,6 @@ tr.clickable:hover{background:var(--bg3)}
 <div id="toasts"></div>
 
 <script>
-/* ========= SUPABASE CONFIGURATION ========= */
-const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
-let supabase = null;
-if(window.supabase){
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
-let SYNC_ENABLED = false; // Evitar loops de sincronización
-
 /* ========= CONSTANTS ========= */
 const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
 const CILINDRADAS = ['50cc','80cc','125cc','150cc','200cc','250cc','300cc','350cc','390cc','400cc','450cc','500cc','600cc','650cc','700cc','750cc','800cc','850cc','900cc','1000cc','1100cc','1200cc','1300cc','1400cc+'];
@@ -580,8 +570,6 @@ function saveCitaEdit(id){
   const horaFin=document.getElementById('eHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
   DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitasToStorage();
-  const cita=DB.citas.get(id);
-  if(cita)saveCitaToSupabase(cita);
   toast('Cita actualizada','ok');
   showCitaDetail(id);renderCal();renderKanban();
   if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
@@ -594,22 +582,11 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
     return;
   }
   DB.citas.update(citaId,{estado:nuevoEstado});
-  const cita=DB.citas.get(citaId);
-  if(cita)saveCitaToSupabase(cita);
   toast('Etapa actualizada','ok');
   showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
-  confirmDelete('¿Cancelar esta cita?',()=>{
-    const cita=DB.citas.get(id);
-    DB.citas.delete(id);
-    closeModal('modalCitaDetail');
-    renderCal();
-    renderKanban();
-    syncCitasToStorage();
-    if(cita && supabase)supabase.from('citas').delete().eq('id',id).then(()=>console.log('✅ Cita eliminada de Supabase'));
-    toast('Cita cancelada','warn');
-  });
+  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
 }
 
 /* ========= WIZARD NUEVA CITA ========= */
@@ -717,8 +694,7 @@ function wizFinish(){
   const horaIni=document.getElementById('wHora').value;
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
-  const newCita=DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  saveCitaToSupabase(newCita);
+  DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
   closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
@@ -1598,127 +1574,7 @@ function rejectSolicitud(rid){
   });
 }
 
-/* ========= SUPABASE SYNC FUNCTIONS ========= */
-async function loadFromSupabase(){
-  try{
-    if(!supabase) throw new Error('Supabase not available');
-    SYNC_ENABLED=false;
-
-    // Cargar CLIENTES
-    const{data:dataCli}=await supabase.from('clientes').select('*');
-    if(dataCli){
-      clientes=dataCli.map(c=>({
-        id:c.id,nombre:c.nombre,apellidos:c.apellidos,telefono:c.telefono,dni:c.dni,
-        correo:c.correo||'',aceptado_gdpr:c.aceptado_gdpr||false,
-        fecha_aceptacion_gdpr:c.fecha_aceptacion_gdpr,fecha_creacion:c.fecha_creacion
-      }));
-    }
-
-    // Cargar MOTOS
-    const{data:dataMot}=await supabase.from('motos').select('*');
-    if(dataMot){
-      motos=dataMot.map(m=>({
-        id:m.id,cliente_id:m.cliente_id,marca:m.marca,modelo:m.modelo,
-        cilindrada:m.cilindrada,matricula:m.matricula,bastidor:m.bastidor,
-        anotaciones:m.anotaciones||[]
-      }));
-    }
-
-    // Cargar CITAS
-    const{data:dataCit}=await supabase.from('citas').select('*');
-    if(dataCit){
-      citas=dataCit.map(c=>({
-        id:c.id,cliente_id:c.cliente_id,moto_id:c.moto_id,tipo_servicio:c.tipo_servicio,
-        fecha_cita:c.fecha_cita,hora_cita:c.hora_cita,hora_fin:c.hora_fin,
-        mecanico_id:c.mecanico_id,nota:c.nota||'',estado:c.estado,
-        desde_booking:c.desde_booking||false,fecha_creacion:c.fecha_creacion
-      }));
-    }
-
-    console.log('✅ Datos cargados de Supabase');
-    SYNC_ENABLED=true;
-    return true;
-  }catch(err){
-    console.error('❌ Error cargando de Supabase:',err);
-    // Fallback a seed local
-    seed();
-    SYNC_ENABLED=true;
-    return false;
-  }
-}
-
-async function saveCitaToSupabase(cita){
-  if(!SYNC_ENABLED || !supabase)return;
-  try{
-    const{error}=await supabase.from('citas').upsert([cita],{onConflict:'id'});
-    if(error)throw error;
-    console.log('✅ Cita guardada en Supabase:',cita.id);
-  }catch(err){
-    console.error('❌ Error guardando cita:',err);
-  }
-}
-
-async function setupRealtimeListeners(){
-  if(!supabase) return; // No hay conexión Supabase
-  // Escuchar cambios en CITAS (para N8N)
-  supabase.channel('citas-changes')
-    .on('postgres_changes',{event:'*',schema:'public',table:'citas'},(payload)=>{
-      if(!SYNC_ENABLED)return;
-      const{eventType,new:newCita,old:oldCita}=payload;
-
-      if(eventType==='INSERT'){
-        // N8N creó una cita
-        citas.push(newCita);
-        renderCal();
-        if(curCliente===newCita.cliente_id && document.getElementById('modalCliente').classList.contains('open')){
-          renderClienteModal();
-        }
-        toast(`Nueva cita: ${cliFull(cliById(newCita.cliente_id))}`)
-      }else if(eventType==='UPDATE'){
-        // N8N modificó una cita
-        const idx=citas.findIndex(c=>c.id===newCita.id);
-        if(idx>=0){
-          citas[idx]=newCita;
-          renderCal();
-          renderKanban();
-          if(curCliente===newCita.cliente_id && document.getElementById('modalCliente').classList.contains('open')){
-            renderClienteModal();
-          }
-          toast(`Cita actualizada: ${cliFull(cliById(newCita.cliente_id))}`)
-        }
-      }else if(eventType==='DELETE'){
-        // N8N canceló una cita
-        citas=citas.filter(c=>c.id!==oldCita.id);
-        renderCal();
-        renderKanban();
-        if(curCliente===oldCita.cliente_id && document.getElementById('modalCliente').classList.contains('open')){
-          renderClienteModal();
-        }
-        toast(`Cita cancelada: ${cliFull(cliById(oldCita.cliente_id))}`,'warn')
-      }
-    })
-    .subscribe();
-  console.log('🔄 Real Time listeners activos');
-}
-
-/* ========= INIT ========= */
-(async()=>{
-  // Intentar cargar desde Supabase, si falla usar seed local
-  const loaded = await loadFromSupabase().catch(()=>false);
-
-  if(!loaded){
-    console.log('Usando datos locales (seed)');
-    seed();
-  }else{
-    setupRealtimeListeners();
-  }
-
-  populateFilters();
-  renderCal();
-  syncCitasToStorage();
-  checkSolicitudes();
-  setInterval(()=>{checkSolicitudes();},15000);
-})();
+seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 </script>
 </body>
 </html>
