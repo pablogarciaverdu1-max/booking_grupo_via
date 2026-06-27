@@ -872,7 +872,7 @@ function tabCitas(c){
   const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   const rows=cs.map(x=>{const moto=DB.motos.get(x.moto_id);return `<tr data-cita-id="${x.id}">
     <td><input type="date" id="cf_${x.id}" value="${x.fecha_cita}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px" onchange="marcarModificado('${x.id}')"></td>
-    <td><select id="ch_${x.id}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px" onchange="marcarModificado('${x.id}')"><option value="">— sin fin —</option>${HORAS.map(h=>`<option ${h===x.hora_cita?'selected':''}>${h}</option>`).join('')}</select></td>
+    <td><select id="ch_${x.id}" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--txt);font-size:12px" onchange="marcarModificado('${x.id}')"><option value="">— sin fin —</option>${HORAS.map(h=>`<option value="${h}" ${h===x.hora_cita?'selected':''}>${h}</option>`).join('')}</select></td>
     <td>${servBadge(x.tipo_servicio)}</td><td>${moto?esc(moto.marca+' '+moto.modelo):'—'}</td><td>${mecName(x.mecanico_id)}</td>
     <td style="font-size:12px;color:var(--txt2)">${x.nota?esc(x.nota):'—'}</td>
     <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
