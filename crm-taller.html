@@ -79,8 +79,8 @@ tr.clickable:hover{background:var(--bg3)}
 
 /* CALENDAR */
 .cal-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
-.cal{width:100%;border-collapse:collapse;min-width:760px}
-.cal th,.cal td{border:1px solid var(--border);padding:0;text-align:center}
+.cal{width:100%;border-collapse:collapse;table-layout:fixed;min-width:760px}
+.cal th,.cal td{border:1px solid var(--border);padding:0;text-align:center;width:calc((100% - 60px) / 6)}
 .cal th{padding:8px;background:var(--bg3);font-size:12px;color:var(--txt2)}
 .cal .timecol{width:60px;font-size:11px;color:var(--txt2);background:var(--bg3);padding:4px}
 .cal td.slot{height:34px;cursor:pointer;position:relative;vertical-align:top;background:var(--bg2)}
@@ -184,6 +184,7 @@ tr.clickable:hover{background:var(--bg3)}
 .funnel-bar:hover{filter:brightness(1.2)}
 .funnel-arrow{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;margin:0 auto}
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="light">
 
@@ -193,7 +194,6 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="nav-item active" data-sec="citas" style="position:relative"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>Citas<span id="navBadge" style="display:none;position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1" id="navBadge"></span></div>
     <div class="nav-item" data-sec="flujo"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="3.5" height="12" rx="1"/><rect x="6.25" y="2" width="3.5" height="8" rx="1"/><rect x="11.5" y="2" width="3.5" height="10" rx="1"/></svg>Flujo Citas</div>
     <div class="nav-item" data-sec="clientes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke-linecap="round"/></svg>Clientes</div>
-    <div class="nav-item" data-sec="seguimientos"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Tareas</div>
     <div class="nav-item" data-sec="informes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg>Informes</div>
   </div>
   <div class="sidebar-bottom">
@@ -251,29 +251,6 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="kanban" id="kanban"></div>
   </div>
 
-  <!-- SEGUIMIENTOS -->
-  <div class="section" id="sec-seguimientos">
-    <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>Tareas</h1></div><div class="page-sub">Gestión de tareas y seguimientos</div>
-    <div class="card" style="margin-bottom:24px">
-      <div class="section-title">Lista de tareas</div>
-      <div style="overflow-x:auto;border-radius:8px">
-        <table style="min-width:700px"><thead><tr><th>✓</th><th>Vencimiento</th><th>Tarea</th><th>Cliente</th><th>Mecánico</th><th>Creación</th></tr></thead>
-        <tbody id="segTbody"></tbody></table>
-      </div>
-      <div class="pagination" id="segPagination"></div>
-    </div>
-    <div class="card">
-      <div class="toolbar">
-        <div class="section-title" style="margin:0;flex:1">Calendario semanal de tareas</div>
-        <button class="btn btn-sec btn-sm" onclick="taskWeek(-1)">‹</button>
-        <button class="btn btn-sec btn-sm" onclick="taskToday()">Hoy</button>
-        <button class="btn btn-sec btn-sm" onclick="taskWeek(1)">›</button>
-        <span id="taskWeekLabel" style="font-weight:600"></span>
-      </div>
-      <div class="cal-wrap"><div id="taskCalContainer"></div></div>
-    </div>
-  </div>
-
   <!-- INFORMES -->
   <div class="section" id="sec-informes">
     <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg><h1>Informes</h1></div><div class="page-sub">Estadísticas y KPIs</div>
@@ -293,9 +270,6 @@ tr.clickable:hover{background:var(--bg3)}
     </div>
     <div class="card" style="margin-bottom:24px"><div class="section-title" style="margin-top:0">Últimas 10 citas</div>
       <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Mecánico</th><th>Estado</th></tr></thead><tbody id="informeCitas"></tbody></table>
-    </div>
-    <div class="card" style="margin-bottom:24px"><div class="section-title" style="margin-top:0">Tareas próximas a vencer (7 días)</div>
-      <table><thead><tr><th>Vencimiento</th><th>Tarea</th><th>Mecánico</th></tr></thead><tbody id="informeTareas"></tbody></table>
     </div>
     <div class="card"><div class="section-title" style="margin-top:0">Mecánico más activo</div><div id="informeMecanico" style="font-size:18px;font-weight:700;color:var(--accent)"></div></div>
   </div>
@@ -338,10 +312,6 @@ tr.clickable:hover{background:var(--bg3)}
   <div id="modalSolicitudesBody" style="padding:4px 0"></div>
 </div></div>
 
-<div class="modal-bg" id="modalTask"><div class="modal"><div class="modal-head"><h2>Detalle tarea</h2><button class="x" onclick="closeModal('modalTask')">×</button></div>
-  <div id="taskBody"></div>
-</div></div>
-
 <div class="modal-bg" id="modalConfirm"><div class="modal" style="max-width:380px"><div class="modal-head"><h2>Confirmar</h2><button class="x" onclick="closeModal('modalConfirm')">×</button></div>
   <p id="confirmMsg" style="margin-bottom:20px"></p>
   <div style="display:flex;gap:10px;justify-content:flex-end">
@@ -353,6 +323,21 @@ tr.clickable:hover{background:var(--bg3)}
 <div id="toasts"></div>
 
 <script>
+/* ========= SUPABASE CONFIGURATION ========= */
+const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+let supabase = null;
+let SYNC_ENABLED = false; // Evitar loops de sincronización
+
+// Inicializar Supabase cuando esté disponible
+function initSupabase(){
+  if(window.supabase){
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return true;
+  }
+  return false;
+}
+
 /* ========= CONSTANTS ========= */
 const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
 const CILINDRADAS = ['50cc','80cc','125cc','150cc','200cc','250cc','300cc','350cc','390cc','400cc','450cc','500cc','600cc','650cc','700cc','750cc','800cc','850cc','900cc','1000cc','1100cc','1200cc','1300cc','1400cc+'];
@@ -385,7 +370,7 @@ function pad(n){return String(n).padStart(2,'0');}
 const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){for(let m=0;m<60;m+=15){a.push(pad(h)+':'+pad(m));};}return a.filter(x=>x>='08:00'&&x<='18:45');})();
 
 /* ========= IN-MEMORY DATA ========= */
-let clientes=[], motos=[], citas=[], tareas=[], ordenes=[], servicios_facturados=[];
+let clientes=[], motos=[], citas=[], ordenes=[], servicios_facturados=[];
 let _id=1; const uid=()=>'id'+(_id++);
 let ordenCounter=1;
 
@@ -426,12 +411,6 @@ function seed(){
   ct(c5,mt8,'mantenimiento',dateOffset(3),'13:00','','pendiente','m10');
   servicios_facturados.push({id:uid(),cita_id:citas[6].id,cliente_id:c4,servicios_std:['Cambio aceite','Pastillas freno'],servicios_custom:['Limpieza cadena'],fecha:dateOffset(-3)});
   servicios_facturados.push({id:uid(),cita_id:citas[8].id,cliente_id:c5,servicios_std:['Revisión general'],servicios_custom:[],fecha:dateOffset(-5)});
-  function tk(cid,desc,venc,hi,hf,mec,comp){tareas.push({id:uid(),cliente_id:cid,descripcion:desc,fecha_vencimiento:venc,hora_inicio:hi,hora_fin:hf,mecanico_id:mec,completada:comp,fecha_creacion:today()});}
-  tk(c1,'Llamar para confirmar cita',today(),'10:00','10:30','m1',false);
-  tk(c2,'Pedir recambio embrague',dateOffset(2),'09:00','09:30','m3',false);
-  tk(c3,'Entregar presupuesto siniestro',dateOffset(1),'12:00','12:30','m7',false);
-  tk(c4,'Revisar garantía',dateOffset(-1),'14:00','14:30','m5',true);
-  tk(c5,'Programar próxima revisión',dateOffset(4),'16:00','16:30','m9',false);
   ordenes.push({id:uid(),numero:'OP-2026-00001',cliente_id:c4,moto_id:mt6,conceptos:[{desc:'Reparación transmisión',cant:1,precio:120,iva:21}],kilometros:25000,observaciones:'Garantía 6 meses',fecha:dateOffset(-3),estado:'pendiente',subtotal:120,iva_total:25.2,total:145.2});
   ordenes.push({id:uid(),numero:'OP-2026-00002',cliente_id:c5,moto_id:mt8,conceptos:[{desc:'Aceite y filtros',cant:1,precio:80,iva:21}],kilometros:30000,observaciones:'',fecha:dateOffset(-5),estado:'pendiente',subtotal:80,iva_total:16.8,total:96.8});
   ordenCounter=3;
@@ -461,14 +440,6 @@ const DB={
     create:o=>{o.id=uid();o.fecha_creacion=today();o.estado='pendiente';citas.push(o);return o;},
     update:(id,p)=>Object.assign(DB.citas.get(id),p),
     delete:id=>{citas=citas.filter(c=>c.id!==id);},
-  },
-  tareas:{
-    all:()=>tareas,
-    byCliente:cid=>tareas.filter(t=>t.cliente_id===cid),
-    get:id=>tareas.find(t=>t.id===id),
-    create:o=>{o.id=uid();o.fecha_creacion=today();o.completada=false;tareas.push(o);return o;},
-    update:(id,p)=>Object.assign(DB.tareas.get(id),p),
-    delete:id=>{tareas=tareas.filter(t=>t.id!==id);},
   },
   ordenes:{
     byCliente:cid=>ordenes.filter(o=>o.cliente_id===cid),
@@ -516,7 +487,6 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
   if(sec==='citas')renderCal();
   if(sec==='clientes')renderClientes();
   if(sec==='flujo')renderKanban();
-  if(sec==='seguimientos'){renderSeguimientos();renderTaskCal();}
   if(sec==='informes')renderInformes();
 });
 
@@ -525,15 +495,15 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
 /* ========= CALENDAR (CITAS) ========= */
 let calBaseDate=new Date();
 function mondayOf(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
-function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
+function weekDays(base){const m=mondayOf(base);return [0,1,2,3,4,5].map(i=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function calWeek(n){calBaseDate.setDate(calBaseDate.getDate()+n*7);renderCal();}
 function calToday(){calBaseDate=new Date();renderCal();}
 function renderCal(){
   const days=weekDays(calBaseDate);
   const mecFiltro=document.getElementById('filtroMecanico')?.value||'';
-  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
-  const dnames=['Lun','Mar','Mié','Jue','Vie'];
+  document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[5].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+  const dnames=['Lun','Mar','Mié','Jue','Vie','Sab'];
   // Build skip map: di -> set of hora strings spanned by a multi-slot cita
   const skip=days.map((d,di)=>{
     const fecha=ymd(d);const s=new Set();
@@ -616,6 +586,8 @@ function saveCitaEdit(id){
   const horaFin=document.getElementById('eHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
   DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitasToStorage();
+  const cita=DB.citas.get(id);
+  if(cita)saveCitaToSupabase(cita);
   toast('Cita actualizada','ok');
   showCitaDetail(id);renderCal();renderKanban();
   if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
@@ -628,11 +600,22 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
     return;
   }
   DB.citas.update(citaId,{estado:nuevoEstado});
+  const cita=DB.citas.get(citaId);
+  if(cita)saveCitaToSupabase(cita);
   toast('Etapa actualizada','ok');
   showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
-  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
+  confirmDelete('¿Cancelar esta cita?',()=>{
+    const cita=DB.citas.get(id);
+    DB.citas.delete(id);
+    closeModal('modalCitaDetail');
+    renderCal();
+    renderKanban();
+    syncCitasToStorage();
+    if(cita && supabase)supabase.from('citas').delete().eq('id',id).then(()=>console.log('✅ Cita eliminada de Supabase'));
+    toast('Cita cancelada','warn');
+  });
 }
 
 /* ========= WIZARD NUEVA CITA ========= */
@@ -740,7 +723,8 @@ function wizFinish(){
   const horaIni=document.getElementById('wHora').value;
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
-  DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
+  const newCita=DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
+  saveCitaToSupabase(newCita);
   closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
@@ -803,18 +787,16 @@ function renderClienteModal(){
     motos:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="4" cy="11" rx="3" ry="3"/><ellipse cx="12" cy="11" rx="3" ry="3"/><path d="M7 11h2l2-5H7l-1 2h2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     citas:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>`,
     recambios:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2" stroke-linecap="round"/><path d="M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4" stroke-linecap="round"/></svg>`,
-    tareas:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     orden:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4" stroke-linecap="round"/></svg>`,
     historial:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   };
-  const tabs=[['datos','Datos personales'],['motos','Datos Moto/s'],['citas','Citas'],['recambios','Recambios'],['tareas','Tareas'],['orden','Orden de trabajo'],['historial','Historial']];
+  const tabs=[['datos','Datos personales'],['motos','Datos Moto/s'],['citas','Citas'],['recambios','Recambios'],['orden','Orden de trabajo'],['historial','Historial']];
   document.getElementById('cdTabs').innerHTML=tabs.map(t=>`<div class="tab ${curTab===t[0]?'active':''}" onclick="curTab='${t[0]}';renderClienteModal()" style="display:flex;align-items:center;gap:5px">${tabIcons[t[0]]}${t[1]}</div>`).join('');
   const ct=document.getElementById('cdContent');
   if(curTab==='datos')ct.innerHTML=tabDatos(c);
   else if(curTab==='motos')ct.innerHTML=tabMotos(c);
   else if(curTab==='citas')ct.innerHTML=tabCitas(c);
   else if(curTab==='recambios')ct.innerHTML=tabRecambios(c);
-  else if(curTab==='tareas')ct.innerHTML=tabTareas(c);
   else if(curTab==='orden')ct.innerHTML=tabOrden(c);
   else if(curTab==='historial')ct.innerHTML=tabHistorial(c);
 }
@@ -824,6 +806,13 @@ function tabDatos(c){return `<div class="tabpane active" style="max-width:560px"
   <div class="row2"><div class="field"><label>DNI</label><input id="edDni" value="${esc(c.dni||'')}"></div>
   <div class="field"><label>Teléfono</label><input id="edTel" value="${esc(c.telefono)}"></div></div>
   <div class="field"><label>Correo</label><input id="edCorreo" value="${esc(c.correo||'')}"></div>
+  <div class="field" style="padding:12px;background:#f0f9ff;border-left:3px solid #3b82f6;border-radius:4px;margin:16px 0">
+    <label style="display:flex;align-items:center;gap:8px;font-weight:600;color:#1e40af;cursor:default;margin:0">
+      <input id="edGDPR" type="checkbox" ${c.aceptado_gdpr?'checked':''} disabled style="margin:0;cursor:default">
+      <span>✓ Aceptó Política de Privacidad RGPD ${c.fecha_aceptacion_gdpr?'<small style="color:#0d47a1">('+c.fecha_aceptacion_gdpr.split('T')[0]+')</small>':''}</span>
+    </label>
+    <small style="color:#0d47a1;display:block;margin-top:4px">ⓘ Estado desde booking - Solo se actualiza cuando cliente acepta en formulario</small>
+  </div>
   <button class="btn" onclick="saveDatos()">Guardar</button></div>`;}
 function saveDatos(){
   const nombre=document.getElementById('edNombre').value.trim();const correo=document.getElementById('edCorreo').value.trim();
@@ -832,7 +821,8 @@ function saveDatos(){
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  DB.clientes.update(curCliente,{nombre,apellidos,dni,telefono:tel,correo});
+  const updateData={nombre,apellidos,dni,telefono:tel,correo};
+  DB.clientes.update(curCliente,updateData);
   curTab='datos';
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
@@ -889,17 +879,15 @@ function guardarTodosCambios(clienteId){
   citas.forEach(cita=>{
     const nuevaFecha=document.getElementById('cf_'+cita.id)?.value;
     const nuevaHora=document.getElementById('ch_'+cita.id)?.value;
-    if(nuevaFecha&&(nuevaFecha!==cita.fecha_cita||nuevaHora!==cita.hora_cita)){
-      const updateData={fecha_cita:nuevaFecha};
-      if(nuevaHora)updateData.hora_cita=nuevaHora;
-      DB.citas.update(cita.id,updateData);
+    if(nuevaFecha&&nuevaHora&&(nuevaFecha!==cita.fecha_cita||nuevaHora!==cita.hora_cita)){
+      DB.citas.update(cita.id,{fecha_cita:nuevaFecha,hora_cita:nuevaHora});
       cambios++;
     }
   });
   if(cambios===0){toast('No hay cambios para guardar','info');return;}
-  syncCitasToStorage();
+  saveCitasDataToStorage();
   toast(cambios+' cita(s) actualizada(s)','ok');
-  renderClienteModal();renderCal();
+  renderClienteModal();renderCal();syncCitasToStorage();
 }
 function cambiarEstadoCita(citaId, nuevoEstado){
   const c=DB.citas.get(citaId);if(!c)return;
@@ -927,32 +915,6 @@ function recToggle(i,v){recState[i]=recState[i]||{qty:1};recState[i].checked=v;r
 function recQty(i,v){recState[i]=recState[i]||{checked:false};recState[i].qty=Math.max(1,parseInt(v)||1);recCalc();}
 function recReset(){recState={};renderClienteModal();}
 function recCalc(){let g=0;RECAMBIOS.forEach((r,i)=>{const st=recState[i]||{checked:false,qty:1};const t=st.checked?r.p*st.qty:0;g+=t;const el=document.getElementById('recTotal'+i);if(el)el.textContent='€'+t.toFixed(2);});const ge=document.getElementById('recGrand');if(ge)ge.textContent='€'+g.toFixed(2);}
-function tabTareas(c){
-  const ts=DB.tareas.byCliente(c.id).filter(t=>!t.completada);
-  return `<div class="tabpane active"><button class="btn" onclick="newTaskForm('${c.id}')">+ Nueva tarea</button>
-    <div id="taskFormSlot"></div>
-    <table style="margin-top:14px"><thead><tr><th>Descripción</th><th>Vencimiento</th><th>Horario</th><th>Mecánico</th><th>Cliente</th><th></th></tr></thead>
-    <tbody id="taskRows">${ts.map(t=>taskRow(t)).join('')||'<tr><td colspan="6" class="empty">Sin tareas</td></tr>'}</tbody></table></div>`;
-}
-function taskRow(t){const c=cliById(t.cliente_id);return `<tr><td>${esc(t.descripcion)}</td><td>${t.fecha_vencimiento}</td><td>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</td><td>${mecName(t.mecanico_id)}</td><td style="color:#3b82f6;cursor:pointer;text-decoration:underline" onclick="openCliFicha('${t.cliente_id}')">${esc(cliFull(c))}</td><td><button class="btn btn-sm" onclick="editTaskForm('${t.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delTask('${t.id}','cli')">Eliminar</button></td></tr>`;}
-function taskFormHtml(cid,t){t=t||{};return `<div class="card" style="margin-top:12px">
-  <div class="field"><label>Descripción *</label><input id="tfDesc" value="${esc(t.descripcion||'')}"></div>
-  <div class="row2"><div class="field"><label>Fecha vencimiento *</label><input type="date" id="tfVenc" value="${t.fecha_vencimiento||today()}"></div>
-  <div class="field"><label>Mecánico</label><select id="tfMec">${mecanicoOptions(t.mecanico_id)}</select></div></div>
-  <div class="row2"><div class="field"><label>Hora inicio</label><select id="tfHi"><option value="">—</option>${opts(HORAS,t.hora_inicio)}</select></div>
-  <div class="field"><label>Hora fin</label><select id="tfHf"><option value="">—</option>${opts(HORAS,t.hora_fin)}</select></div></div>
-  <button class="btn" onclick="saveTask('${cid}','${t.id||''}')">Guardar</button> <button class="btn btn-sec" onclick="document.getElementById('taskFormSlot').innerHTML=''">Cancelar</button></div>`;}
-function newTaskForm(cid){document.getElementById('taskFormSlot').innerHTML=taskFormHtml(cid,null);}
-function editTaskForm(id){const t=DB.tareas.get(id);document.getElementById('taskFormSlot').innerHTML=taskFormHtml(t.cliente_id,t);}
-function saveTask(cid,id){
-  const desc=document.getElementById('tfDesc').value.trim();const venc=document.getElementById('tfVenc').value;
-  if(!desc||!venc){toast('Descripción y vencimiento obligatorios','err');return;}
-  const data={cliente_id:cid,descripcion:desc,fecha_vencimiento:venc,hora_inicio:document.getElementById('tfHi').value,hora_fin:document.getElementById('tfHf').value,mecanico_id:document.getElementById('tfMec').value};
-  if(id)DB.tareas.update(id,data);else DB.tareas.create(data);
-  renderClienteModal();toast('Tarea guardada','ok');
-}
-function delTask(id,ctx){confirmDelete('¿Eliminar tarea?',()=>{DB.tareas.delete(id);if(ctx==='cli')renderClienteModal();else{renderSeguimientos();renderTaskCal();}toast('Tarea eliminada','warn');});}
-
 /* ORDEN DE TRABAJO TAB */
 const SERVICIOS_GALERIA=[
   {id:'sg_aceite',icon:'🛢',nombre:'Cambio de aceite y filtro',precio:45,iva:21},
@@ -1334,72 +1296,6 @@ function confirmCompletar(){
   closeModal('modalCompletar');renderKanban();toast('Servicio completado','ok');
 }
 
-/* ========= SEGUIMIENTOS ========= */
-let segPage=1;const segPer=10;
-function renderSeguimientos(){
-  const list=tareas.filter(t=>!t.completada).slice().sort((a,b)=>a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
-  const pages=Math.max(1,Math.ceil(list.length/segPer));
-  if(segPage>pages)segPage=pages;if(segPage<1)segPage=1;
-  const slice=list.slice((segPage-1)*segPer,segPage*segPer);
-  document.getElementById('segTbody').innerHTML=slice.map(t=>`<tr id="segrow_${t.id}"><td><input type="checkbox" onchange="segComplete('${t.id}')"></td><td>${t.fecha_vencimiento}</td><td>${esc(t.descripcion)}</td><td><a href="#" onclick="openCliente('${t.cliente_id}');return false" style="color:var(--accent-blue);text-decoration:none;cursor:pointer">${esc(cliFull(cliById(t.cliente_id)))}</a></td><td>${mecName(t.mecanico_id)}</td><td>${t.fecha_creacion}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Sin tareas pendientes</td></tr>';
-  document.getElementById('segPagination').innerHTML=`<button class="btn btn-sec btn-sm" ${segPage<=1?'disabled':''} onclick="segPage--;renderSeguimientos()">‹ Anterior</button><span>Página ${segPage} de ${pages}</span><button class="btn btn-sec btn-sm" ${segPage>=pages?'disabled':''} onclick="segPage++;renderSeguimientos()">Siguiente ›</button>`;
-}
-function segComplete(id){
-  const row=document.getElementById('segrow_'+id);
-  if(row){row.style.textDecoration='line-through';row.style.opacity='0.5';}
-  DB.tareas.update(id,{completada:true});
-  setTimeout(()=>{renderSeguimientos();renderTaskCal();},600);
-  toast('Tarea completada','ok');
-}
-let taskBaseDate=new Date();
-function taskWeek(n){taskBaseDate.setDate(taskBaseDate.getDate()+n*7);renderTaskCal();}
-function taskToday(){taskBaseDate=new Date();renderTaskCal();}
-function renderTaskCal(){
-  const days=weekDays(taskBaseDate);
-  document.getElementById('taskWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short'});
-  const dnames=['Lun','Mar','Mié','Jue','Vie'];
-  let h='<table class="cal"><thead><tr><th class="timecol"></th>';
-  days.forEach((d,i)=>h+=`<th>${dnames[i]}<br>${d.getDate()}/${d.getMonth()+1}</th>`);
-  h+='</tr></thead><tbody>';
-  HORAS.forEach(hora=>{
-    h+=`<tr><td class="timecol">${hora}</td>`;
-    days.forEach(d=>{
-      const fecha=ymd(d);
-      const ts=tareas.filter(t=>t.fecha_vencimiento===fecha&&t.hora_inicio===hora&&!t.completada);
-      h+='<td class="slot">';
-      ts.forEach(t=>{const c=cliById(t.cliente_id);
-        h+=`<div class="chip" style="background:#ef4444" onclick="showTask('${t.id}')">${esc(cliFull(c))} · ${esc(t.descripcion)}</div>`;});
-      h+='</td>';
-    });
-    h+='</tr>';
-  });
-  h+='</tbody></table>';
-  document.getElementById('taskCalContainer').innerHTML=h;
-}
-function showTask(id){
-  const t=DB.tareas.get(id);const c=cliById(t.cliente_id);
-  const btnMarcar=document.createElement('button');btnMarcar.className='btn';btnMarcar.textContent='✓ Marcar completada';btnMarcar.addEventListener('click',()=>marcarTareaCompletada(id));
-  const btnFicha=document.createElement('button');btnFicha.className='btn btn-sec';btnFicha.textContent='Ver ficha cliente';btnFicha.addEventListener('click',()=>{closeModal('modalTask');openCliente(t.cliente_id);});
-  const divBody=document.createElement('div');divBody.innerHTML=`<div class="field"><label>Tarea</label>${esc(t.descripcion)}</div>
-    <div class="field"><label>Cliente</label>${esc(cliFull(c))}</div>
-    <div class="field"><label>Mecánico</label>${mecName(t.mecanico_id)}</div>
-    <div class="field"><label>Horario</label>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</div>
-    <div class="field"><label>Vencimiento</label>${t.fecha_vencimiento}</div>
-    <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>`;
-  const divBotones=document.createElement('div');divBotones.style.cssText='display:flex;gap:12px;margin-top:18px;flex-wrap:wrap';divBotones.appendChild(btnMarcar);divBotones.appendChild(btnFicha);
-  const taskBody=document.getElementById('taskBody');taskBody.innerHTML='';taskBody.appendChild(divBody);taskBody.appendChild(divBotones);
-  openModal('modalTask');
-}
-function marcarTareaCompletada(id){
-  const t=DB.tareas.get(id);if(!t)return;
-  DB.tareas.update(id,{completada:true});
-  syncCitasToStorage();
-  closeModal('modalTask');
-  renderSeguimientos();
-  renderTaskCal();
-  toast('Tarea marcada como completada','ok');
-}
-
 /* ========= INFORMES ========= */
 function renderFunnel(){
   const funnelMec=document.getElementById('funnelMecFiltro').value;
@@ -1494,9 +1390,6 @@ function renderInformes(){
   document.getElementById('chartServicio').innerHTML=Object.entries(SERVICIOS).map(([k,v])=>`<div class="bar-row"><div class="bar-label">${v.label}</div><div class="bar-track"><div class="bar-fill" style="width:${cs[k]/maxS*100}%;background:${v.color}">${cs[k]}</div></div></div>`).join('');
 const ult=citas.slice().sort((a,b)=>(b.fecha_cita+b.hora_cita).localeCompare(a.fecha_cita+a.hora_cita)).slice(0,10);
   document.getElementById('informeCitas').innerHTML=ult.map(c=>`<tr><td>${c.fecha_cita}</td><td>${esc(cliFull(cliById(c.cliente_id)))}</td><td>${servBadge(c.tipo_servicio)}</td><td>${mecName(c.mecanico_id)}</td><td>${estadoBadge(c.estado)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">—</td></tr>';
-  const lim=dateOffset(7);
-  const prox=tareas.filter(t=>!t.completada&&t.fecha_vencimiento>=today()&&t.fecha_vencimiento<=lim).slice().sort((a,b)=>a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
-  document.getElementById('informeTareas').innerHTML=prox.map(t=>`<tr><td>${t.fecha_vencimiento}</td><td>${esc(t.descripcion)}</td><td>${mecName(t.mecanico_id)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Sin tareas próximas</td></tr>';
   const mc={};citas.forEach(c=>mc[c.mecanico_id]=(mc[c.mecanico_id]||0)+1);
   let top=null,topN=0;Object.entries(mc).forEach(([m,n])=>{if(n>topN){topN=n;top=m;}});
   document.getElementById('informeMecanico').textContent=top?(mecName(top)+' ('+topN+' citas)'):'—';
@@ -1511,6 +1404,8 @@ function syncCitasToStorage(){
     hora_fin:c.hora_fin||addMinsStr(c.hora_cita,30)
   }));
   try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
+  try{localStorage.setItem('gv_ocupados_madrid',JSON.stringify(ocupados));}catch(e){}
+  try{localStorage.setItem('gv_ocupados_argentina',JSON.stringify(ocupados));}catch(e){}
 }
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
@@ -1525,7 +1420,12 @@ function copiarLinkCitas(){
 
 function checkSolicitudes(){
   let list=[];
-  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  try{
+    const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+    const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+    const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+    list=[...list1,...list2,...list3];
+  }catch{}
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const badge=document.getElementById('navBadge');
   if(badge){
@@ -1552,7 +1452,12 @@ function renderSolicitudes(pending){
 
 function openModalSolicitudes(){
   let list=[];
-  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  try{
+    const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+    const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+    const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+    list=[...list1,...list2,...list3];
+  }catch{}
   const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const DIAS_N=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const MESES_N=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -1607,19 +1512,30 @@ function toggleSolRow(rid){
 }
 
 function acceptSolicitud(rid){
-  let list=[];
-  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  let list=[],sourceTaller=null;
+  try{
+    const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+    const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+    const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+    const r1=list1.find(x=>x.id===rid);
+    const r2=list2.find(x=>x.id===rid);
+    const r3=list3.find(x=>x.id===rid);
+    if(r1){list=list1;sourceTaller='reservas';}
+    else if(r2){list=list2;sourceTaller='madrid';}
+    else if(r3){list=list3;sourceTaller='argentina';}
+  }catch{}
   const r=list.find(x=>x.id===rid);
   if(!r||r.estado!=='pendiente_confirmacion')return; // guard doble clic
   // Mark FIRST to prevent duplicate processing
   r.estado='confirmada';
-  localStorage.setItem('gv_reservas',JSON.stringify(list));
+  const key='gv_'+(sourceTaller==='reservas'?'reservas':(sourceTaller==='madrid'?'reservas_madrid':'reservas_argentina'));
+  localStorage.setItem(key,JSON.stringify(list));
   // Create client (or find existing by phone)
   let cliId=null;
   const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
-  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});}
+  if(existing){cliId=existing.id;if(!existing.dni&&r.dni)DB.clientes.update(cliId,{dni:r.dni});if(!existing.aceptado_gdpr&&r.aceptado_gdpr)DB.clientes.update(cliId,{aceptado_gdpr:r.aceptado_gdpr,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr});}
   else{
-    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||''});
+    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:r.dni||'',aceptado_gdpr:r.aceptado_gdpr||false,fecha_aceptacion_gdpr:r.fecha_aceptacion_gdpr||null});
     cliId=nc.id;
   }
   // Use the CRM service key stored directly by booking.html, fallback to map
@@ -1647,7 +1563,13 @@ function acceptSolicitud(rid){
   // Refresh solicitudes modal if open, close it when no more pending
   const solModal=document.getElementById('modalSolicitudes');
   if(solModal&&solModal.classList.contains('open')){
-    const remaining=JSON.parse(localStorage.getItem('gv_reservas')||'[]').filter(x=>x.estado==='pendiente_confirmacion');
+    let remaining=[];
+    try{
+      const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+      const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+      const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+      remaining=[...list1,...list2,...list3].filter(x=>x.estado==='pendiente_confirmacion');
+    }catch{}
     if(remaining.length===0){closeModal('modalSolicitudes');}
     else{openModalSolicitudes();}
   }
@@ -1661,39 +1583,161 @@ function acceptSolicitud(rid){
 
 function rejectSolicitud(rid){
   confirmDelete('¿Rechazar esta solicitud?',()=>{
-    let list=[];
-    try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
-    const r=list.find(x=>x.id===rid);if(r)r.estado='rechazada';
-    localStorage.setItem('gv_reservas',JSON.stringify(list));
+    let list=[],sourceTaller=null;
+    try{
+      const list1=JSON.parse(localStorage.getItem('gv_reservas')||'[]');
+      const list2=JSON.parse(localStorage.getItem('gv_reservas_madrid')||'[]');
+      const list3=JSON.parse(localStorage.getItem('gv_reservas_argentina')||'[]');
+      const r1=list1.find(x=>x.id===rid);
+      const r2=list2.find(x=>x.id===rid);
+      const r3=list3.find(x=>x.id===rid);
+      if(r1){list=list1;sourceTaller='reservas';}
+      else if(r2){list=list2;sourceTaller='madrid';}
+      else if(r3){list=list3;sourceTaller='argentina';}
+    }catch{}
+    const r=list.find(x=>x.id===rid);
+    if(r)r.estado='rechazada';
+    const key='gv_'+(sourceTaller==='reservas'?'reservas':(sourceTaller==='madrid'?'reservas_madrid':'reservas_argentina'));
+    localStorage.setItem(key,JSON.stringify(list));
     checkSolicitudes();
     toast('Solicitud rechazada','warn');
   });
 }
 
-seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
+/* ========= SUPABASE SYNC FUNCTIONS ========= */
+async function loadFromSupabase(){
+  try{
+    // Intentar inicializar Supabase si no está listo
+    if(!supabase){
+      if(!initSupabase()){
+        throw new Error('Supabase library not loaded');
+      }
+    }
 
-// ========= CARGA DE DATOS DEMO ==========
-function loadDemoData(){
-  fetch('./datos_demo.json')
-    .then(r=>r.json())
-    .then(data=>{
-      clientes=data.clientes;
-      motos=data.motos;
-      citas=data.citas;
-      tareas=data.tareas;
-      saveCitasDataToStorage();
-      populateFilters();
-      renderCal();
-      renderKanban();
-      renderClientes();
-      renderSeguimientos();
-      toast('✓ Demo cargado: 5,000 clientes, 25K citas, 10K tareas','ok');
-    })
-    .catch(err=>toast('Error cargando demo: '+err.message,'err'));
+    SYNC_ENABLED=false;
+
+    // Cargar CLIENTES
+    const{data:dataCli}=await supabase.from('clientes').select('*');
+    if(dataCli){
+      clientes=dataCli.map(c=>({
+        id:c.id,nombre:c.nombre,apellidos:c.apellidos,telefono:c.telefono,dni:c.dni,
+        correo:c.correo||'',aceptado_gdpr:c.aceptado_gdpr||false,
+        fecha_aceptacion_gdpr:c.fecha_aceptacion_gdpr,fecha_creacion:c.fecha_creacion
+      }));
+    }
+
+    // Cargar MOTOS
+    const{data:dataMot}=await supabase.from('motos').select('*');
+    if(dataMot){
+      motos=dataMot.map(m=>({
+        id:m.id,cliente_id:m.cliente_id,marca:m.marca,modelo:m.modelo,
+        cilindrada:m.cilindrada,matricula:m.matricula,bastidor:m.bastidor,
+        anotaciones:m.anotaciones||[]
+      }));
+    }
+
+    // Cargar CITAS
+    const{data:dataCit}=await supabase.from('citas').select('*');
+    if(dataCit){
+      citas=dataCit.map(c=>({
+        id:c.id,cliente_id:c.cliente_id,moto_id:c.moto_id,tipo_servicio:c.tipo_servicio,
+        fecha_cita:c.fecha_cita,hora_cita:c.hora_cita,hora_fin:c.hora_fin,
+        mecanico_id:c.mecanico_id,nota:c.nota||'',estado:c.estado,
+        desde_booking:c.desde_booking||false,fecha_creacion:c.fecha_creacion
+      }));
+    }
+
+    console.log('✅ Datos cargados de Supabase');
+    SYNC_ENABLED=true;
+    return true;
+  }catch(err){
+    console.error('❌ Error cargando de Supabase:',err);
+    // Fallback a seed local
+    seed();
+    SYNC_ENABLED=true;
+    return false;
+  }
 }
 
-// Descomentar la siguiente línea para cargar DEMO en lugar de seed
-// loadDemoData();
+async function saveCitaToSupabase(cita){
+  if(!SYNC_ENABLED || !supabase)return;
+  try{
+    const{error}=await supabase.from('citas').upsert([cita],{onConflict:'id'});
+    if(error)throw error;
+    console.log('✅ Cita guardada en Supabase:',cita.id);
+  }catch(err){
+    console.error('❌ Error guardando cita:',err);
+  }
+}
+
+async function setupRealtimeListeners(){
+  if(!supabase) return; // No hay conexión Supabase
+  // Escuchar cambios en CITAS (para N8N)
+  supabase.channel('citas-changes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'citas'},(payload)=>{
+      if(!SYNC_ENABLED)return;
+      const{eventType,new:newCita,old:oldCita}=payload;
+
+      if(eventType==='INSERT'){
+        // N8N creó una cita
+        citas.push(newCita);
+        renderCal();
+        if(curCliente===newCita.cliente_id && document.getElementById('modalCliente').classList.contains('open')){
+          renderClienteModal();
+        }
+        toast(`Nueva cita: ${cliFull(cliById(newCita.cliente_id))}`)
+      }else if(eventType==='UPDATE'){
+        // N8N modificó una cita
+        const idx=citas.findIndex(c=>c.id===newCita.id);
+        if(idx>=0){
+          citas[idx]=newCita;
+          renderCal();
+          renderKanban();
+          if(curCliente===newCita.cliente_id && document.getElementById('modalCliente').classList.contains('open')){
+            renderClienteModal();
+          }
+          toast(`Cita actualizada: ${cliFull(cliById(newCita.cliente_id))}`)
+        }
+      }else if(eventType==='DELETE'){
+        // N8N canceló una cita
+        citas=citas.filter(c=>c.id!==oldCita.id);
+        renderCal();
+        renderKanban();
+        if(curCliente===oldCita.cliente_id && document.getElementById('modalCliente').classList.contains('open')){
+          renderClienteModal();
+        }
+        toast(`Cita cancelada: ${cliFull(cliById(oldCita.cliente_id))}`,'warn')
+      }
+    })
+    .subscribe();
+  console.log('🔄 Real Time listeners activos');
+}
+
+/* ========= INIT ========= */
+(async()=>{
+  // Esperar a que Supabase esté disponible
+  let attempts = 0;
+  while(!initSupabase() && attempts < 50){
+    await new Promise(r=>setTimeout(r,100));
+    attempts++;
+  }
+
+  if(!supabase){
+    console.warn('⚠️ Supabase no disponible, usando seed local');
+    seed();
+  }else{
+    const loaded = await loadFromSupabase();
+    if(!loaded){
+      setupRealtimeListeners();
+    }
+  }
+
+  populateFilters();
+  renderCal();
+  syncCitasToStorage();
+  checkSolicitudes();
+  setInterval(()=>{checkSolicitudes();},15000);
+})();
 </script>
 </body>
 </html>

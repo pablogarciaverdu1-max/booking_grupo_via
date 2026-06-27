@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRUPO VIA - Testing Booking Links</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  color: #fff;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.subtitle {
+  text-align: center;
+  color: #cbd5e1;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+.card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #3b82f6;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.icon {
+  font-size: 32px;
+}
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.card-location {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+.link-button {
+  display: inline-block;
+  background: #3b82f6;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-right: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.link-button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+.link-button.secondary {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+}
+.link-button.secondary:hover {
+  background: rgba(59, 130, 246, 0.3);
+}
+.features {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+}
+.features li {
+  padding: 8px 0;
+  padding-left: 24px;
+  position: relative;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+.features li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #22c55e;
+  font-weight: bold;
+}
+.info-box {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 20px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+.info-box strong {
+  color: #22c55e;
+}
+.testing-guide {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 30px;
+}
+.testing-guide h3 {
+  color: #3b82f6;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.testing-guide ol {
+  margin-left: 20px;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.8;
+}
+.testing-guide ol li {
+  margin-bottom: 10px;
+}
+.status-badge {
+  display: inline-block;
+  background: #22c55e;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+.code-block {
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 3px solid #3b82f6;
+  padding: 12px;
+  margin: 10px 0;
+  font-family: monospace;
+  font-size: 12px;
+  color: #93c5fd;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🏍️ GRUPO VIA - Prueba Booking Pages</h1>
+  <p class="subtitle">Links para probar las dos ubicaciones de talleres</p>
+
+  <!-- MADRID -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📍</div>
+      <div>
+        <div class="card-title">Taller Madrid</div>
+        <div class="card-location">Avenida Madrid, 80 • Barcelona</div>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; margin-bottom: 14px; color: #cbd5e1;">
+      Página de reserva dedicada para el taller de Avenida Madrid con calendario y formulario específico.
+    </p>
+
+    <ul class="features">
+      <li>Sincronización con CRM vía localStorage</li>
+      <li>Identificadas con taller: 'madrid'</li>
+      <li>Claves: gv_reservas_madrid, gv_ocupados_madrid</li>
+      <li>Citas mostradas en MORADO en el calendario</li>
+    </ul>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="./index-madrid.html" class="link-button" target="_blank">Abrir Booking</a>
+      <button class="link-button secondary" onclick="copyLink('index-madrid.html')">Copiar Link</button>
+    </div>
+
+    <div class="info-box">
+      <strong>localStorage keys:</strong>
+      <div class="code-block">
+gv_reservas_madrid = [] (reservas pendientes)<br>
+gv_ocupados_madrid = [] (slots ocupados)
+      </div>
+    </div>
+  </div>
+
+  <!-- ARGENTINA -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📍</div>
+      <div>
+        <div class="card-title">Taller Argentina</div>
+        <div class="card-location">Avenida República Argentina, 83 • Barcelona</div>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; margin-bottom: 14px; color: #cbd5e1;">
+      Página de reserva dedicada para el taller de Avenida República Argentina con calendario y formulario específico.
+    </p>
+
+    <ul class="features">
+      <li>Sincronización con CRM vía localStorage</li>
+      <li>Identificadas con taller: 'argentina'</li>
+      <li>Claves: gv_reservas_argentina, gv_ocupados_argentina</li>
+      <li>Citas mostradas en MORADO en el calendario</li>
+    </ul>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="./index-argentina.html" class="link-button" target="_blank">Abrir Booking</a>
+      <button class="link-button secondary" onclick="copyLink('index-argentina.html')">Copiar Link</button>
+    </div>
+
+    <div class="info-box">
+      <strong>localStorage keys:</strong>
+      <div class="code-block">
+gv_reservas_argentina = [] (reservas pendientes)<br>
+gv_ocupados_argentina = [] (slots ocupados)
+      </div>
+    </div>
+  </div>
+
+  <!-- CRM -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">⚙️</div>
+      <div>
+        <div class="card-title">CRM Taller</div>
+        <div class="card-location">Control de Citas y Clientes</div>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; margin-bottom: 14px; color: #cbd5e1;">
+      Sistema de gestión que sincroniza con ambas páginas de booking y muestra todas las citas.
+    </p>
+
+    <ul class="features">
+      <li>Lee reservas de gv_reservas, gv_reservas_madrid y gv_reservas_argentina</li>
+      <li>Muestra solicitudes pendientes de ambos talleres</li>
+      <li>Citas desde booking aparecen en MORADO (#a855f7)</li>
+      <li>Notificaciones en tiempo real</li>
+    </ul>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="./crm-taller.html" class="link-button" target="_blank">Abrir CRM</a>
+      <button class="link-button secondary" onclick="copyLink('crm-taller.html')">Copiar Link</button>
+    </div>
+
+    <span class="status-badge">✓ Actualizado v1.28</span>
+  </div>
+
+  <!-- TESTING GUIDE -->
+  <div class="testing-guide">
+    <h3>📋 GUÍA DE PRUEBA</h3>
+    <ol>
+      <li><strong>Abre dos pestañas:</strong> Una con cada página de booking (Madrid y Argentina)</li>
+      <li><strong>En booking Madrid:</strong>
+        <ul style="margin: 8px 0 8px 20px;">
+          <li>Selecciona fecha y hora</li>
+          <li>Rellena datos del cliente (nombre, teléfono, DNI)</li>
+          <li>Añade datos de la moto</li>
+          <li>Confirma la reserva</li>
+        </ul>
+      </li>
+      <li><strong>En booking Argentina:</strong> Repite el mismo proceso (misma fecha/hora pero con cliente diferente)</li>
+      <li><strong>En CRM:</strong>
+        <ul style="margin: 8px 0 8px 20px;">
+          <li>Verás un badge con "2 solicitudes pendientes"</li>
+          <li>Las citas aparecerán en MORADO en el calendario</li>
+          <li>Puedes aceptar/rechazar cada reserva</li>
+          <li>Se crearán como citas definitivas con flag "desde_booking"</li>
+        </ul>
+      </li>
+      <li><strong>Verifica sincronización:</strong> Abre DevTools (F12) → Console → Escribe:
+        <div class="code-block">
+localStorage.getItem('gv_reservas_madrid') // Ver reservas Madrid<br>
+localStorage.getItem('gv_reservas_argentina') // Ver reservas Argentina<br>
+localStorage.getItem('gv_ocupados_madrid') // Ver slots ocupados Madrid
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="info-box" style="margin-top: 30px; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3);">
+    <strong style="color: #f59e0b;">⚠️ IMPORTANTE:</strong> Los datos se almacenan localmente en el navegador (localStorage).
+    Si limpias el caché, perderás los datos. Para una base de datos persistente, es necesario usar Supabase, Firebase o similar.
+  </div>
+</div>
+
+<script>
+function copyLink(filename) {
+  const protocol = window.location.protocol;
+  const host = window.location.host;
+  const path = window.location.pathname.replace(/[^/]*$/, '');
+  const fullUrl = `${protocol}//${host}${path}${filename}`;
+
+  navigator.clipboard.writeText(fullUrl).then(() => {
+    alert('✓ Link copiado:\n' + fullUrl);
+  }).catch(() => {
+    prompt('Copia este link:', fullUrl);
+  });
+}
+</script>
+
+</body>
+</html>

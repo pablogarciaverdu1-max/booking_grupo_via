@@ -1,0 +1,6 @@
+id,nombre,apellidos,dni,telefono,correo,aceptado_gdpr,fecha_aceptacion_gdpr,fecha_creacion
+id1,Carlos,Romero Gil,12345678A,611222333,carlos@mail.com,true,2025-06-20,2025-01-15
+id2,María,Fernández Vega,23456789B,622333444,maria@mail.com,true,2025-06-22,2025-02-20
+id3,José,Martín Ruiz,34567890C,633444555,jose@mail.com,true,2025-06-18,2025-03-10
+id4,Laura,Gómez Soto,45678901D,644555666,laura@mail.com,true,2025-06-24,2025-04-05
+id5,Pedro,Navarro Díaz,56789012E,655666777,pedro@mail.com,true,2025-06-21,2025-05-12

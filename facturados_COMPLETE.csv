@@ -1,0 +1,4 @@
+id,cita_id,cliente_id,servicios_std,servicios_custom,fecha
+fac1,cit7,id4,"[""Cambio aceite"",""Ajuste cadena""]","[""Limpieza cadena""]",2025-06-23
+fac2,cit9,id5,"[""Revisión general""]","[""Diagnóstico eléctrico""]",2025-06-21
+fac3,cit6,id3,"[""Revisión general""]","[]",2025-06-24

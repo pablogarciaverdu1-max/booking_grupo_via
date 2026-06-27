@@ -1,0 +1,8 @@
+id,cliente_id,descripcion,fecha_vencimiento,hora_inicio,hora_fin,mecanico_id,completada,fecha_creacion
+tar1,id1,Llamar para confirmar cita,2025-06-26,10:00,10:30,m1,false,2025-06-25
+tar2,id2,Pedir recambio embrague,2025-06-28,09:00,09:30,m3,false,2025-06-24
+tar3,id3,Entregar presupuesto siniestro,2025-06-27,12:00,12:30,m7,false,2025-06-25
+tar4,id4,Revisar garantía,2025-06-25,14:00,14:30,m5,true,2025-06-23
+tar5,id5,Programar próxima revisión,2025-06-30,16:00,16:30,m9,false,2025-06-22
+tar6,id1,Solicitar cliente feedback,2025-07-01,11:00,11:15,m1,false,2025-06-26
+tar7,id2,Revisar sistema eléctrico,2025-07-02,15:00,15:45,m3,false,2025-06-26
