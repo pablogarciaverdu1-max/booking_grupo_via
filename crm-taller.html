@@ -326,8 +326,8 @@ tr.clickable:hover{background:var(--bg3)}
 /* ========= SUPABASE ========= */
 const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
-let supabase = null;
-if(window.supabase) supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.supabase_client = null;
+if(typeof window.supabase !== 'undefined') window.supabase_client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let SYNC_ENABLED = false;
 
 /* ========= CONSTANTS ========= */
@@ -577,7 +577,7 @@ function saveCitaEdit(id){
   const horaIni=document.getElementById('eHoraIni').value;
   const horaFin=document.getElementById('eHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
-  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitasToStorage();
+  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitaToSupabase(DB.citas.get(id));syncCitasToStorage();
   toast('Cita actualizada','ok');
   showCitaDetail(id);renderCal();renderKanban();
   if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
@@ -589,7 +589,7 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
     const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);showCitaDetail(citaId);renderKanban();renderCal();}},200);
     return;
   }
-  DB.citas.update(citaId,{estado:nuevoEstado});
+  DB.citas.update(citaId,{estado:nuevoEstado});syncCitaToSupabase(DB.citas.get(citaId));
   toast('Etapa actualizada','ok');
   showCitaDetail(citaId);renderKanban();renderCal();
 }
@@ -680,7 +680,7 @@ function wizNext(){
     const tel=document.getElementById('wnTel').value.trim();const dni=document.getElementById('wnDni').value.trim();
     if(!nombre){toast('El nombre es obligatorio','err');return;}
     if(DB.clientes.existsByPhoneOrDni(tel,dni)){toast('Ya existe un cliente con ese teléfono/DNI','err');return;}
-    const c=DB.clientes.create({nombre,apellidos:document.getElementById('wnApellidos').value.trim(),telefono:tel,dni,correo:''});
+    const c=DB.clientes.create({nombre,apellidos:document.getElementById('wnApellidos').value.trim(),telefono:tel,dni,correo:''});syncClienteToSupabase(c);
     wiz.clienteId=c.id;wiz.step=3;renderWizard();renderClientes();
   } else if(wiz.step===3){
     const ms=DB.motos.byCliente(wiz.clienteId);
@@ -692,7 +692,7 @@ function wizNext(){
       const mat=document.getElementById('wmMat').value.trim();
       if(!marca||!modelo){toast('Marca y modelo obligatorios','err');return;}
       const kmVal=document.getElementById('wmKm').value.trim();
-      const m=DB.motos.create({cliente_id:wiz.clienteId,marca,modelo,cilindrada:document.getElementById('wmCil').value,matricula:mat,bastidor:document.getElementById('wmBas').value.trim(),kilometros:kmVal?parseInt(kmVal):null});
+      const m=DB.motos.create({cliente_id:wiz.clienteId,marca,modelo,cilindrada:document.getElementById('wmCil').value,matricula:mat,bastidor:document.getElementById('wmBas').value.trim(),kilometros:kmVal?parseInt(kmVal):null});syncMotoToSupabase(m);
       wiz.motoId=m.id;wiz.nuevaMoto=null;wiz.step=4;renderWizard();
     } else if(ms.length){toast('Selecciona o crea una moto','err');}
   }
@@ -702,7 +702,7 @@ function wizFinish(){
   const horaIni=document.getElementById('wHora').value;
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
-  DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
+  const newCita=DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});syncCitaToSupabase(newCita);
   closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
@@ -1582,13 +1582,18 @@ function rejectSolicitud(rid){
   });
 }
 
+/* ========= SYNC FUNCTIONS ========= */
+async function syncClienteToSupabase(c){try{if(!window.supabase_client)return;await window.supabase_client.from('clientes').upsert({id:c.id,nombre:c.nombre,apellidos:c.apellidos,dni:c.dni,correo:c.correo||'',telefono:c.telefono||'',fecha_creacion:c.fecha_creacion},'id');}catch(e){}}
+async function syncMotoToSupabase(m){try{if(!window.supabase_client)return;await window.supabase_client.from('motos').upsert({id:m.id,cliente_id:m.cliente_id,marca:m.marca,modelo:m.modelo,cilindrada:m.cilindrada||'',matricula:m.matricula||'',bastidor:m.bastidor||''},'id');}catch(e){}}
+async function syncCitaToSupabase(c){try{if(!window.supabase_client)return;await window.supabase_client.from('citas').upsert({id:c.id,cliente_id:c.cliente_id,moto_id:c.moto_id,tipo_servicio:c.tipo_servicio,fecha_cita:c.fecha_cita,hora_cita:c.hora_cita,hora_fin:c.hora_fin||null,mecanico_id:c.mecanico_id||'',nota:c.nota||'',estado:c.estado,fecha_creacion:c.fecha_creacion},'id');}catch(e){}}
+
 /* ========= SUPABASE LOAD ========= */
 async function loadFromSupabase(){
   try{
-    if(!supabase) throw new Error('Supabase not available');
-    const{data:clientes_data}=await supabase.from('clientes').select('*');
-    const{data:motos_data}=await supabase.from('motos').select('*');
-    const{data:citas_data}=await supabase.from('citas').select('*');
+    if(!window.supabase_client) throw new Error('Supabase not available');
+    const{data:clientes_data}=await window.supabase_client.from('clientes').select('*');
+    const{data:motos_data}=await window.supabase_client.from('motos').select('*');
+    const{data:citas_data}=await window.supabase_client.from('citas').select('*');
     if(clientes_data) clientes=clientes_data;
     if(motos_data) motos=motos_data;
     if(citas_data) citas=citas_data;
