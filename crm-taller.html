@@ -219,6 +219,7 @@ tr.clickable:hover{background:var(--bg3)}
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#3b82f6;display:inline-block"></span>ITV</span>
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#22c55e;display:inline-block"></span>Reparación</span>
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#a855f7;display:inline-block"></span>Desde Booking</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#6b7280;display:inline-block"></span>Tarea</span>
     </div>
     <div class="cal-wrap"><div id="calContainer"></div></div>
   </div>
@@ -549,7 +550,7 @@ function renderCal(){
         const citaLabel=`${esc(cliFull(cl))} · ${sv.label}`;
         h+=`<div class="chip" style="background:${bgColor};${chipH}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${citaLabel}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       const ts=tareas.filter(t=>t.fecha===fecha&&t.hora_inicio===hora);
-      ts.forEach(t=>{h+=`<div class="chip" style="background:#8b5cf6;font-size:11px;padding:4px 6px;cursor:pointer;border:1px solid #7c3aed" onclick="event.stopPropagation();showTareaDetailCal('${t.id}')" title="${esc(t.titulo)}">📝 ${esc(t.titulo.substring(0,20))}${t.titulo.length>20?'...':''}</div>`;});
+      ts.forEach(t=>{h+=`<div class="chip" style="background:#6b7280;font-size:11px;padding:4px 6px;cursor:pointer;border:1px solid #4b5563" onclick="event.stopPropagation();showTareaDetailCal('${t.id}')" title="${esc(t.titulo)}">📝 ${esc(t.titulo.substring(0,20))}${t.titulo.length>20?'...':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -799,6 +800,7 @@ function renderClienteModal(){
   if(curTab==='datos')ct.innerHTML=tabDatos(c);
   else if(curTab==='motos')ct.innerHTML=tabMotos(c);
   else if(curTab==='citas')ct.innerHTML=tabCitas(c);
+  else if(curTab==='tareas')ct.innerHTML=tabTareas(c);
   else if(curTab==='orden')ct.innerHTML=tabOrden(c);
   else if(curTab==='historial')ct.innerHTML=tabHistorial(c);
 }
@@ -922,7 +924,7 @@ let tareaClienteSeleccionadoId=null;
 function openNewTarea(){document.getElementById('tareaTitulo').value='';document.getElementById('tareaClienteSearch').value='';document.getElementById('tareaClienteResultados').style.display='none';tareaClienteSeleccionadoId=null;document.getElementById('tareaFecha').value=today();document.getElementById('tareaDesc').value='';const horaIni=document.getElementById('tareaHora');const horaFin=document.getElementById('tareaHoraFin');horaIni.innerHTML='';horaFin.innerHTML='';HORAS.forEach(h=>{const o1=document.createElement('option');o1.value=h;o1.textContent=h;horaIni.appendChild(o1);const o2=document.createElement('option');o2.value=h;o2.textContent=h;horaFin.appendChild(o2);});horaIni.value='09:00';horaFin.value='10:00';openModal('modalTarea');}
 function filtrarTareaClientes(){const search=document.getElementById('tareaClienteSearch').value.toLowerCase();const resultados=document.getElementById('tareaClienteResultados');if(!search){resultados.style.display='none';return;}const filtered=clientes.filter(c=>cliFull(c).toLowerCase().includes(search)).slice(0,10);if(filtered.length===0){resultados.innerHTML='<div style="padding:10px;color:var(--txt2);text-align:center">Sin resultados</div>';resultados.style.display='block';return;}resultados.innerHTML=filtered.map(c=>`<div style="padding:10px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--modal);transition:.1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--modal)'" onclick="seleccionarTareaCliente('${c.id}','${esc(cliFull(c))}')">${esc(cliFull(c))}</div>`).join('');resultados.style.display='block';}
 function seleccionarTareaCliente(id,nombre){tareaClienteSeleccionadoId=id;document.getElementById('tareaClienteSearch').value=nombre;document.getElementById('tareaClienteResultados').style.display='none';}
-function saveTarea(){const titulo=document.getElementById('tareaTitulo').value.trim();const fecha=document.getElementById('tareaFecha').value;const horaIni=document.getElementById('tareaHora').value;const horaFin=document.getElementById('tareaHoraFin').value;const desc=document.getElementById('tareaDesc').value.trim();if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}const tarea={id:uid(),titulo,cliente_id:tareaClienteSeleccionadoId,fecha,hora_inicio:horaIni,hora_fin:horaFin,descripcion:desc,estado:'pendiente',fecha_creacion:today()};tareas.push(tarea);saveToLocalStorage();syncTareaToSupabase(tarea);closeModal('modalTarea');renderClienteModal();toast('Tarea creada','ok');}
+function saveTarea(){const titulo=document.getElementById('tareaTitulo').value.trim();const fecha=document.getElementById('tareaFecha').value;const horaIni=document.getElementById('tareaHora').value;const horaFin=document.getElementById('tareaHoraFin').value;const desc=document.getElementById('tareaDesc').value.trim();if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}const tarea={id:uid(),titulo,cliente_id:tareaClienteSeleccionadoId,fecha,hora_inicio:horaIni,hora_fin:horaFin,descripcion:desc,estado:'pendiente',fecha_creacion:today()};tareas.push(tarea);saveToLocalStorage();syncTareaToSupabase(tarea);closeModal('modalTarea');renderCal();if(tareaClienteSeleccionadoId)renderClienteModal();toast('Tarea creada','ok');}
 function tabTareas(c){const ts=tareas.filter(t=>t.cliente_id===c.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));return `<div class="tabpane active">${ts.length===0?'<div class="empty">Sin tareas</div>':'<div style="display:flex;flex-direction:column;gap:12px">'+ts.map(t=>{const fechaCreacion=new Date(t.fecha_creacion);const fechaFormato=fechaCreacion.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'});return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px" id="tarea-${t.id}">
 <div style="display:flex;align-items:flex-start;gap:12px">
   <input type="checkbox" ${t.estado==='completada'?'checked':''} onchange="marcarTareaCompletada('${t.id}')" style="width:20px;height:20px;cursor:pointer;margin-top:2px;flex-shrink:0">
