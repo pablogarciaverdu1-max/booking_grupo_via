@@ -193,7 +193,6 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="nav-item active" data-sec="citas" style="position:relative"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>Citas<span id="navBadge" style="display:none;position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1" id="navBadge"></span></div>
     <div class="nav-item" data-sec="flujo"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="3.5" height="12" rx="1"/><rect x="6.25" y="2" width="3.5" height="8" rx="1"/><rect x="11.5" y="2" width="3.5" height="10" rx="1"/></svg>Flujo Citas</div>
     <div class="nav-item" data-sec="clientes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke-linecap="round"/></svg>Clientes</div>
-    <div class="nav-item" data-sec="seguimientos"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Tareas</div>
     <div class="nav-item" data-sec="informes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg>Informes</div>
   </div>
   <div class="sidebar-bottom">
@@ -251,29 +250,6 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="kanban" id="kanban"></div>
   </div>
 
-  <!-- SEGUIMIENTOS -->
-  <div class="section" id="sec-seguimientos">
-    <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>Tareas</h1></div><div class="page-sub">Gestión de tareas y seguimientos</div>
-    <div class="card" style="margin-bottom:24px">
-      <div class="section-title">Lista de tareas</div>
-      <div style="overflow-x:auto;border-radius:8px">
-        <table style="min-width:700px"><thead><tr><th>✓</th><th>Vencimiento</th><th>Tarea</th><th>Cliente</th><th>Mecánico</th><th>Creación</th></tr></thead>
-        <tbody id="segTbody"></tbody></table>
-      </div>
-      <div class="pagination" id="segPagination"></div>
-    </div>
-    <div class="card">
-      <div class="toolbar">
-        <div class="section-title" style="margin:0;flex:1">Calendario semanal de tareas</div>
-        <button class="btn btn-sec btn-sm" onclick="taskWeek(-1)">‹</button>
-        <button class="btn btn-sec btn-sm" onclick="taskToday()">Hoy</button>
-        <button class="btn btn-sec btn-sm" onclick="taskWeek(1)">›</button>
-        <span id="taskWeekLabel" style="font-weight:600"></span>
-      </div>
-      <div class="cal-wrap"><div id="taskCalContainer"></div></div>
-    </div>
-  </div>
-
   <!-- INFORMES -->
   <div class="section" id="sec-informes">
     <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg><h1>Informes</h1></div><div class="page-sub">Estadísticas y KPIs</div>
@@ -293,9 +269,6 @@ tr.clickable:hover{background:var(--bg3)}
     </div>
     <div class="card" style="margin-bottom:24px"><div class="section-title" style="margin-top:0">Últimas 10 citas</div>
       <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Mecánico</th><th>Estado</th></tr></thead><tbody id="informeCitas"></tbody></table>
-    </div>
-    <div class="card" style="margin-bottom:24px"><div class="section-title" style="margin-top:0">Tareas próximas a vencer (7 días)</div>
-      <table><thead><tr><th>Vencimiento</th><th>Tarea</th><th>Mecánico</th></tr></thead><tbody id="informeTareas"></tbody></table>
     </div>
     <div class="card"><div class="section-title" style="margin-top:0">Mecánico más activo</div><div id="informeMecanico" style="font-size:18px;font-weight:700;color:var(--accent)"></div></div>
   </div>
@@ -336,10 +309,6 @@ tr.clickable:hover{background:var(--bg3)}
 
 <div class="modal-bg" id="modalSolicitudes"><div class="modal" style="max-width:820px"><div class="modal-head"><h2>Solicitudes de reserva</h2><button class="x" onclick="closeModal('modalSolicitudes')">×</button></div>
   <div id="modalSolicitudesBody" style="padding:4px 0"></div>
-</div></div>
-
-<div class="modal-bg" id="modalTask"><div class="modal"><div class="modal-head"><h2>Detalle tarea</h2><button class="x" onclick="closeModal('modalTask')">×</button></div>
-  <div id="taskBody"></div>
 </div></div>
 
 <div class="modal-bg" id="modalConfirm"><div class="modal" style="max-width:380px"><div class="modal-head"><h2>Confirmar</h2><button class="x" onclick="closeModal('modalConfirm')">×</button></div>
@@ -385,7 +354,7 @@ function pad(n){return String(n).padStart(2,'0');}
 const HORAS = (()=>{const a=[];for(let h=8;h<=18;h++){for(let m=0;m<60;m+=15){a.push(pad(h)+':'+pad(m));};}return a.filter(x=>x>='08:00'&&x<='18:45');})();
 
 /* ========= IN-MEMORY DATA ========= */
-let clientes=[], motos=[], citas=[], tareas=[], ordenes=[], servicios_facturados=[];
+let clientes=[], motos=[], citas=[], ordenes=[], servicios_facturados=[];
 let _id=1; const uid=()=>'id'+(_id++);
 let ordenCounter=1;
 
@@ -426,12 +395,6 @@ function seed(){
   ct(c5,mt8,'mantenimiento',dateOffset(3),'13:00','','pendiente','m10');
   servicios_facturados.push({id:uid(),cita_id:citas[6].id,cliente_id:c4,servicios_std:['Cambio aceite','Pastillas freno'],servicios_custom:['Limpieza cadena'],fecha:dateOffset(-3)});
   servicios_facturados.push({id:uid(),cita_id:citas[8].id,cliente_id:c5,servicios_std:['Revisión general'],servicios_custom:[],fecha:dateOffset(-5)});
-  function tk(cid,desc,venc,hi,hf,mec,comp){tareas.push({id:uid(),cliente_id:cid,descripcion:desc,fecha_vencimiento:venc,hora_inicio:hi,hora_fin:hf,mecanico_id:mec,completada:comp,fecha_creacion:today()});}
-  tk(c1,'Llamar para confirmar cita',today(),'10:00','10:30','m1',false);
-  tk(c2,'Pedir recambio embrague',dateOffset(2),'09:00','09:30','m3',false);
-  tk(c3,'Entregar presupuesto siniestro',dateOffset(1),'12:00','12:30','m7',false);
-  tk(c4,'Revisar garantía',dateOffset(-1),'14:00','14:30','m5',true);
-  tk(c5,'Programar próxima revisión',dateOffset(4),'16:00','16:30','m9',false);
   ordenes.push({id:uid(),numero:'OP-2026-00001',cliente_id:c4,moto_id:mt6,conceptos:[{desc:'Reparación transmisión',cant:1,precio:120,iva:21}],kilometros:25000,observaciones:'Garantía 6 meses',fecha:dateOffset(-3),estado:'pendiente',subtotal:120,iva_total:25.2,total:145.2});
   ordenes.push({id:uid(),numero:'OP-2026-00002',cliente_id:c5,moto_id:mt8,conceptos:[{desc:'Aceite y filtros',cant:1,precio:80,iva:21}],kilometros:30000,observaciones:'',fecha:dateOffset(-5),estado:'pendiente',subtotal:80,iva_total:16.8,total:96.8});
   ordenCounter=3;
@@ -461,14 +424,6 @@ const DB={
     create:o=>{o.id=uid();o.fecha_creacion=today();o.estado='pendiente';citas.push(o);return o;},
     update:(id,p)=>Object.assign(DB.citas.get(id),p),
     delete:id=>{citas=citas.filter(c=>c.id!==id);},
-  },
-  tareas:{
-    all:()=>tareas,
-    byCliente:cid=>tareas.filter(t=>t.cliente_id===cid),
-    get:id=>tareas.find(t=>t.id===id),
-    create:o=>{o.id=uid();o.fecha_creacion=today();o.completada=false;tareas.push(o);return o;},
-    update:(id,p)=>Object.assign(DB.tareas.get(id),p),
-    delete:id=>{tareas=tareas.filter(t=>t.id!==id);},
   },
   ordenes:{
     byCliente:cid=>ordenes.filter(o=>o.cliente_id===cid),
@@ -516,7 +471,6 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
   if(sec==='citas')renderCal();
   if(sec==='clientes')renderClientes();
   if(sec==='flujo')renderKanban();
-  if(sec==='seguimientos'){renderSeguimientos();renderTaskCal();}
   if(sec==='informes')renderInformes();
 });
 
@@ -803,18 +757,16 @@ function renderClienteModal(){
     motos:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="4" cy="11" rx="3" ry="3"/><ellipse cx="12" cy="11" rx="3" ry="3"/><path d="M7 11h2l2-5H7l-1 2h2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     citas:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>`,
     recambios:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2" stroke-linecap="round"/><path d="M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4" stroke-linecap="round"/></svg>`,
-    tareas:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     orden:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4" stroke-linecap="round"/></svg>`,
     historial:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   };
-  const tabs=[['datos','Datos personales'],['motos','Datos Moto/s'],['citas','Citas'],['recambios','Recambios'],['tareas','Tareas'],['orden','Orden de trabajo'],['historial','Historial']];
+  const tabs=[['datos','Datos personales'],['motos','Datos Moto/s'],['citas','Citas'],['recambios','Recambios'],['orden','Orden de trabajo'],['historial','Historial']];
   document.getElementById('cdTabs').innerHTML=tabs.map(t=>`<div class="tab ${curTab===t[0]?'active':''}" onclick="curTab='${t[0]}';renderClienteModal()" style="display:flex;align-items:center;gap:5px">${tabIcons[t[0]]}${t[1]}</div>`).join('');
   const ct=document.getElementById('cdContent');
   if(curTab==='datos')ct.innerHTML=tabDatos(c);
   else if(curTab==='motos')ct.innerHTML=tabMotos(c);
   else if(curTab==='citas')ct.innerHTML=tabCitas(c);
   else if(curTab==='recambios')ct.innerHTML=tabRecambios(c);
-  else if(curTab==='tareas')ct.innerHTML=tabTareas(c);
   else if(curTab==='orden')ct.innerHTML=tabOrden(c);
   else if(curTab==='historial')ct.innerHTML=tabHistorial(c);
 }
@@ -933,32 +885,6 @@ function recToggle(i,v){recState[i]=recState[i]||{qty:1};recState[i].checked=v;r
 function recQty(i,v){recState[i]=recState[i]||{checked:false};recState[i].qty=Math.max(1,parseInt(v)||1);recCalc();}
 function recReset(){recState={};renderClienteModal();}
 function recCalc(){let g=0;RECAMBIOS.forEach((r,i)=>{const st=recState[i]||{checked:false,qty:1};const t=st.checked?r.p*st.qty:0;g+=t;const el=document.getElementById('recTotal'+i);if(el)el.textContent='€'+t.toFixed(2);});const ge=document.getElementById('recGrand');if(ge)ge.textContent='€'+g.toFixed(2);}
-function tabTareas(c){
-  const ts=DB.tareas.byCliente(c.id).filter(t=>!t.completada);
-  return `<div class="tabpane active"><button class="btn" onclick="newTaskForm('${c.id}')">+ Nueva tarea</button>
-    <div id="taskFormSlot"></div>
-    <table style="margin-top:14px"><thead><tr><th>Descripción</th><th>Vencimiento</th><th>Horario</th><th>Mecánico</th><th>Cliente</th><th></th></tr></thead>
-    <tbody id="taskRows">${ts.map(t=>taskRow(t)).join('')||'<tr><td colspan="6" class="empty">Sin tareas</td></tr>'}</tbody></table></div>`;
-}
-function taskRow(t){const c=cliById(t.cliente_id);return `<tr><td>${esc(t.descripcion)}</td><td>${t.fecha_vencimiento}</td><td>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</td><td>${mecName(t.mecanico_id)}</td><td style="color:#3b82f6;cursor:pointer;text-decoration:underline" onclick="openCliFicha('${t.cliente_id}')">${esc(cliFull(c))}</td><td><button class="btn btn-sm" onclick="editTaskForm('${t.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delTask('${t.id}','cli')">Eliminar</button></td></tr>`;}
-function taskFormHtml(cid,t){t=t||{};return `<div class="card" style="margin-top:12px">
-  <div class="field"><label>Descripción *</label><input id="tfDesc" value="${esc(t.descripcion||'')}"></div>
-  <div class="row2"><div class="field"><label>Fecha vencimiento *</label><input type="date" id="tfVenc" value="${t.fecha_vencimiento||today()}"></div>
-  <div class="field"><label>Mecánico</label><select id="tfMec">${mecanicoOptions(t.mecanico_id)}</select></div></div>
-  <div class="row2"><div class="field"><label>Hora inicio</label><select id="tfHi"><option value="">—</option>${opts(HORAS,t.hora_inicio)}</select></div>
-  <div class="field"><label>Hora fin</label><select id="tfHf"><option value="">—</option>${opts(HORAS,t.hora_fin)}</select></div></div>
-  <button class="btn" onclick="saveTask('${cid}','${t.id||''}')">Guardar</button> <button class="btn btn-sec" onclick="document.getElementById('taskFormSlot').innerHTML=''">Cancelar</button></div>`;}
-function newTaskForm(cid){document.getElementById('taskFormSlot').innerHTML=taskFormHtml(cid,null);}
-function editTaskForm(id){const t=DB.tareas.get(id);document.getElementById('taskFormSlot').innerHTML=taskFormHtml(t.cliente_id,t);}
-function saveTask(cid,id){
-  const desc=document.getElementById('tfDesc').value.trim();const venc=document.getElementById('tfVenc').value;
-  if(!desc||!venc){toast('Descripción y vencimiento obligatorios','err');return;}
-  const data={cliente_id:cid,descripcion:desc,fecha_vencimiento:venc,hora_inicio:document.getElementById('tfHi').value,hora_fin:document.getElementById('tfHf').value,mecanico_id:document.getElementById('tfMec').value};
-  if(id)DB.tareas.update(id,data);else DB.tareas.create(data);
-  renderClienteModal();toast('Tarea guardada','ok');
-}
-function delTask(id,ctx){confirmDelete('¿Eliminar tarea?',()=>{DB.tareas.delete(id);if(ctx==='cli')renderClienteModal();else{renderSeguimientos();renderTaskCal();}toast('Tarea eliminada','warn');});}
-
 /* ORDEN DE TRABAJO TAB */
 const SERVICIOS_GALERIA=[
   {id:'sg_aceite',icon:'🛢',nombre:'Cambio de aceite y filtro',precio:45,iva:21},
@@ -1340,72 +1266,6 @@ function confirmCompletar(){
   closeModal('modalCompletar');renderKanban();toast('Servicio completado','ok');
 }
 
-/* ========= SEGUIMIENTOS ========= */
-let segPage=1;const segPer=10;
-function renderSeguimientos(){
-  const list=tareas.filter(t=>!t.completada).slice().sort((a,b)=>a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
-  const pages=Math.max(1,Math.ceil(list.length/segPer));
-  if(segPage>pages)segPage=pages;if(segPage<1)segPage=1;
-  const slice=list.slice((segPage-1)*segPer,segPage*segPer);
-  document.getElementById('segTbody').innerHTML=slice.map(t=>`<tr id="segrow_${t.id}"><td><input type="checkbox" onchange="segComplete('${t.id}')"></td><td>${t.fecha_vencimiento}</td><td>${esc(t.descripcion)}</td><td><a href="#" onclick="openCliente('${t.cliente_id}');return false" style="color:var(--accent-blue);text-decoration:none;cursor:pointer">${esc(cliFull(cliById(t.cliente_id)))}</a></td><td>${mecName(t.mecanico_id)}</td><td>${t.fecha_creacion}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Sin tareas pendientes</td></tr>';
-  document.getElementById('segPagination').innerHTML=`<button class="btn btn-sec btn-sm" ${segPage<=1?'disabled':''} onclick="segPage--;renderSeguimientos()">‹ Anterior</button><span>Página ${segPage} de ${pages}</span><button class="btn btn-sec btn-sm" ${segPage>=pages?'disabled':''} onclick="segPage++;renderSeguimientos()">Siguiente ›</button>`;
-}
-function segComplete(id){
-  const row=document.getElementById('segrow_'+id);
-  if(row){row.style.textDecoration='line-through';row.style.opacity='0.5';}
-  DB.tareas.update(id,{completada:true});
-  setTimeout(()=>{renderSeguimientos();renderTaskCal();},600);
-  toast('Tarea completada','ok');
-}
-let taskBaseDate=new Date();
-function taskWeek(n){taskBaseDate.setDate(taskBaseDate.getDate()+n*7);renderTaskCal();}
-function taskToday(){taskBaseDate=new Date();renderTaskCal();}
-function renderTaskCal(){
-  const days=weekDays(taskBaseDate);
-  document.getElementById('taskWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short'});
-  const dnames=['Lun','Mar','Mié','Jue','Vie'];
-  let h='<table class="cal"><thead><tr><th class="timecol"></th>';
-  days.forEach((d,i)=>h+=`<th>${dnames[i]}<br>${d.getDate()}/${d.getMonth()+1}</th>`);
-  h+='</tr></thead><tbody>';
-  HORAS.forEach(hora=>{
-    h+=`<tr><td class="timecol">${hora}</td>`;
-    days.forEach(d=>{
-      const fecha=ymd(d);
-      const ts=tareas.filter(t=>t.fecha_vencimiento===fecha&&t.hora_inicio===hora&&!t.completada);
-      h+='<td class="slot">';
-      ts.forEach(t=>{const c=cliById(t.cliente_id);
-        h+=`<div class="chip" style="background:#ef4444" onclick="showTask('${t.id}')">${esc(cliFull(c))} · ${esc(t.descripcion)}</div>`;});
-      h+='</td>';
-    });
-    h+='</tr>';
-  });
-  h+='</tbody></table>';
-  document.getElementById('taskCalContainer').innerHTML=h;
-}
-function showTask(id){
-  const t=DB.tareas.get(id);const c=cliById(t.cliente_id);
-  const btnMarcar=document.createElement('button');btnMarcar.className='btn';btnMarcar.textContent='✓ Marcar completada';btnMarcar.addEventListener('click',()=>marcarTareaCompletada(id));
-  const btnFicha=document.createElement('button');btnFicha.className='btn btn-sec';btnFicha.textContent='Ver ficha cliente';btnFicha.addEventListener('click',()=>{closeModal('modalTask');openCliFicha(t.cliente_id);});
-  const divBody=document.createElement('div');divBody.innerHTML=`<div class="field"><label>Tarea</label>${esc(t.descripcion)}</div>
-    <div class="field"><label>Cliente</label>${esc(cliFull(c))}</div>
-    <div class="field"><label>Mecánico</label>${mecName(t.mecanico_id)}</div>
-    <div class="field"><label>Horario</label>${t.hora_inicio||'—'} - ${t.hora_fin||'—'}</div>
-    <div class="field"><label>Vencimiento</label>${t.fecha_vencimiento}</div>
-    <div class="field"><label>Estado</label>${t.completada?'✓ Completada':'Pendiente'}</div>`;
-  const divBotones=document.createElement('div');divBotones.style.cssText='display:flex;gap:12px;margin-top:18px;flex-wrap:wrap';divBotones.appendChild(btnMarcar);divBotones.appendChild(btnFicha);
-  const taskBody=document.getElementById('taskBody');taskBody.innerHTML='';taskBody.appendChild(divBody);taskBody.appendChild(divBotones);
-  openModal('modalTask');
-}
-function marcarTareaCompletada(id){
-  const t=DB.tareas.get(id);if(!t)return;
-  DB.tareas.update(id,{completada:true});
-  syncCitasToStorage();
-  closeModal('modalTask');
-  renderSeguimientos();
-  renderTaskCal();
-  toast('Tarea marcada como completada','ok');
-}
-
 /* ========= INFORMES ========= */
 function renderFunnel(){
   const funnelMec=document.getElementById('funnelMecFiltro').value;
@@ -1500,9 +1360,6 @@ function renderInformes(){
   document.getElementById('chartServicio').innerHTML=Object.entries(SERVICIOS).map(([k,v])=>`<div class="bar-row"><div class="bar-label">${v.label}</div><div class="bar-track"><div class="bar-fill" style="width:${cs[k]/maxS*100}%;background:${v.color}">${cs[k]}</div></div></div>`).join('');
 const ult=citas.slice().sort((a,b)=>(b.fecha_cita+b.hora_cita).localeCompare(a.fecha_cita+a.hora_cita)).slice(0,10);
   document.getElementById('informeCitas').innerHTML=ult.map(c=>`<tr><td>${c.fecha_cita}</td><td>${esc(cliFull(cliById(c.cliente_id)))}</td><td>${servBadge(c.tipo_servicio)}</td><td>${mecName(c.mecanico_id)}</td><td>${estadoBadge(c.estado)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">—</td></tr>';
-  const lim=dateOffset(7);
-  const prox=tareas.filter(t=>!t.completada&&t.fecha_vencimiento>=today()&&t.fecha_vencimiento<=lim).slice().sort((a,b)=>a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
-  document.getElementById('informeTareas').innerHTML=prox.map(t=>`<tr><td>${t.fecha_vencimiento}</td><td>${esc(t.descripcion)}</td><td>${mecName(t.mecanico_id)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Sin tareas próximas</td></tr>';
   const mc={};citas.forEach(c=>mc[c.mecanico_id]=(mc[c.mecanico_id]||0)+1);
   let top=null,topN=0;Object.entries(mc).forEach(([m,n])=>{if(n>topN){topN=n;top=m;}});
   document.getElementById('informeMecanico').textContent=top?(mecName(top)+' ('+topN+' citas)'):'—';
