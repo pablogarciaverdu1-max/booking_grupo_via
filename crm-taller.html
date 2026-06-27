@@ -296,6 +296,20 @@ tr.clickable:hover{background:var(--bg3)}
   </div>
 </div></div>
 
+<div class="modal-bg" id="modalEditarTarea"><div class="modal"><div class="modal-head"><h2>Editar Tarea</h2><button class="x" onclick="closeModal('modalEditarTarea')">×</button></div>
+  <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+    <div class="field"><label>Título *</label><input id="editTareaTitulo" placeholder="Título de la tarea"></div>
+    <div class="field"><label>Cliente</label><div style="position:relative"><input id="editTareaClienteSearch" placeholder="Escribe nombre del cliente..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px" oninput="filtrarEditTareaClientes()" autocomplete="off"><div id="editTareaClienteResultados" style="position:absolute;top:100%;left:0;right:0;background:var(--modal);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;z-index:100;display:none"></div></div></div>
+    <div class="row2"><div class="field"><label>Fecha *</label><input type="date" id="editTareaFecha"></div><div class="field"><label>Hora inicio *</label><select id="editTareaHora"></select></div><div class="field"><label>Hora fin *</label><select id="editTareaHoraFin"></select></div></div>
+    <div class="field"><label>Descripción</label><textarea id="editTareaDesc" rows="3" placeholder="Detalles de la tarea..."></textarea></div>
+    <div class="field"><label style="font-size:12px;font-weight:700;color:var(--txt2)">ESTADO</label><select id="editTareaEstado"><option value="pendiente">Pendiente</option><option value="completada">Completada</option></select></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-sec" onclick="closeModal('modalEditarTarea')">Cancelar</button>
+      <button class="btn" onclick="guardarEditarTarea()">Guardar Cambios</button>
+    </div>
+  </div>
+</div></div>
+
 <div class="modal-bg" id="modalCliente"><div class="modal big"><div class="modal-head" style="padding:20px 24px;border-bottom:1px solid var(--border);margin:0"><h2 id="clienteModalTitle">Cliente</h2><button class="x" onclick="closeModal('modalCliente')">×</button></div>
   <div class="cd-body">
     <div class="cd-left" id="cdLeft"></div>
@@ -907,18 +921,31 @@ function openNewTarea(){document.getElementById('tareaTitulo').value='';document
 function filtrarTareaClientes(){const search=document.getElementById('tareaClienteSearch').value.toLowerCase();const resultados=document.getElementById('tareaClienteResultados');if(!search){resultados.style.display='none';return;}const filtered=clientes.filter(c=>cliFull(c).toLowerCase().includes(search)).slice(0,10);if(filtered.length===0){resultados.innerHTML='<div style="padding:10px;color:var(--txt2);text-align:center">Sin resultados</div>';resultados.style.display='block';return;}resultados.innerHTML=filtered.map(c=>`<div style="padding:10px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--modal);transition:.1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--modal)'" onclick="seleccionarTareaCliente('${c.id}','${esc(cliFull(c))}')">${esc(cliFull(c))}</div>`).join('');resultados.style.display='block';}
 function seleccionarTareaCliente(id,nombre){tareaClienteSeleccionadoId=id;document.getElementById('tareaClienteSearch').value=nombre;document.getElementById('tareaClienteResultados').style.display='none';}
 function saveTarea(){const titulo=document.getElementById('tareaTitulo').value.trim();const fecha=document.getElementById('tareaFecha').value;const horaIni=document.getElementById('tareaHora').value;const horaFin=document.getElementById('tareaHoraFin').value;const desc=document.getElementById('tareaDesc').value.trim();if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}const tarea={id:uid(),titulo,cliente_id:tareaClienteSeleccionadoId,fecha,hora_inicio:horaIni,hora_fin:horaFin,descripcion:desc,estado:'pendiente',fecha_creacion:today()};tareas.push(tarea);saveToLocalStorage();syncTareaToSupabase(tarea);closeModal('modalTarea');renderClienteModal();toast('Tarea creada','ok');}
-function tabTareas(c){const ts=tareas.filter(t=>t.cliente_id===c.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));return `<div class="tabpane active">${ts.length===0?'<div class="empty">Sin tareas</div>':'<div style="display:flex;flex-direction:column;gap:10px">'+ts.map(t=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px" id="tarea-${t.id}">
-<input type="checkbox" ${t.estado==='completada'?'checked':''} onchange="marcarTareaCompletada('${t.id}')" style="width:20px;height:20px;cursor:pointer">
-<div style="flex:1">
-  <div style="font-weight:600;font-size:14px;color:var(--accent);text-decoration:${t.estado==='completada'?'line-through':'none'};opacity:${t.estado==='completada'?'0.6':'1'}">${esc(t.titulo)}</div>
-  <div style="font-size:12px;color:var(--txt2);margin-bottom:4px">${t.fecha} · ${t.hora_inicio}-${t.hora_fin}</div>
-  ${t.descripcion?`<div style="font-size:12px;margin-bottom:4px;padding:6px;background:var(--bg3);border-radius:4px">${esc(t.descripcion)}</div>`:''}
+function tabTareas(c){const ts=tareas.filter(t=>t.cliente_id===c.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));return `<div class="tabpane active">${ts.length===0?'<div class="empty">Sin tareas</div>':'<div style="display:flex;flex-direction:column;gap:12px">'+ts.map(t=>{const fechaCreacion=new Date(t.fecha_creacion);const fechaFormato=fechaCreacion.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'});return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px" id="tarea-${t.id}">
+<div style="display:flex;align-items:flex-start;gap:12px">
+  <input type="checkbox" ${t.estado==='completada'?'checked':''} onchange="marcarTareaCompletada('${t.id}')" style="width:20px;height:20px;cursor:pointer;margin-top:2px;flex-shrink:0">
+  <div style="flex:1">
+    <div style="font-weight:600;font-size:14px;color:var(--accent);text-decoration:${t.estado==='completada'?'line-through':'none'};opacity:${t.estado==='completada'?'0.6':'1'};margin-bottom:6px">${esc(t.titulo)}</div>
+    <div style="font-size:12px;color:var(--txt2);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+      <span>📅 ${t.fecha} ${t.hora_inicio}-${t.hora_fin}</span>
+      <span>📝 Creada: ${fechaFormato}</span>
+      <span style="padding:2px 6px;border-radius:4px;background:${t.estado==='completada'?'#22c55e33':'#3b82f633'};color:${t.estado==='completada'?'#22c55e':'#3b82f6'};font-weight:500">${t.estado==='completada'?'✓ Completada':'Pendiente'}</span>
+    </div>
+    ${t.descripcion?`<div style="font-size:12px;padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:6px;border-left:3px solid var(--accent)">${esc(t.descripcion)}</div>`:''}
+  </div>
 </div>
-<button class="btn btn-sm btn-danger" onclick="deleteTarea('${t.id}')" style="font-size:11px;padding:6px 10px">Eliminar</button>
-</div>`).join('')+'</div>'}</div>`;
+<div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+  <button class="btn btn-sm" onclick="abrirEditarTarea('${t.id}')" style="font-size:11px;padding:6px 10px">Editar</button>
+  <button class="btn btn-sm btn-danger" onclick="deleteTarea('${t.id}')" style="font-size:11px;padding:6px 10px">Eliminar</button>
+</div>
+</div>`}).join('')+'</div>'}</div>`;
 }
 function toggleTareaEstado(id){const t=tareas.find(x=>x.id===id);if(t){t.estado=t.estado==='completada'?'pendiente':'completada';saveToLocalStorage();syncTareaToSupabase(t);renderClienteModal();}}
 function marcarTareaCompletada(id){const t=tareas.find(x=>x.id===id);if(t){t.estado='completada';saveToLocalStorage();syncTareaToSupabase(t);renderClienteModal();setTimeout(()=>{tareas=tareas.filter(x=>x.id!==id);saveToLocalStorage();renderClienteModal();toast('Tarea eliminada','warn');},5000);}}
+function abrirEditarTarea(id){const t=tareas.find(x=>x.id===id);if(!t)return;let editTareaClienteSeleccionadoId=t.cliente_id;document.getElementById('editTareaTitulo').value=t.titulo;document.getElementById('editTareaClienteSearch').value=t.cliente_id?cliFull(clientes.find(c=>c.id===t.cliente_id))||'':'';document.getElementById('editTareaFecha').value=t.fecha;document.getElementById('editTareaDesc').value=t.descripcion||'';document.getElementById('editTareaEstado').value=t.estado;const horaIni=document.getElementById('editTareaHora');const horaFin=document.getElementById('editTareaHoraFin');horaIni.innerHTML='';horaFin.innerHTML='';HORAS.forEach(h=>{const o1=document.createElement('option');o1.value=h;o1.textContent=h;horaIni.appendChild(o1);const o2=document.createElement('option');o2.value=h;o2.textContent=h;horaFin.appendChild(o2);});horaIni.value=t.hora_inicio;horaFin.value=t.hora_fin;document.getElementById('editTareaResultadosId')=id;window.editTareaClienteSeleccionadoId=editTareaClienteSeleccionadoId;openModal('modalEditarTarea');}
+function filtrarEditTareaClientes(){const search=document.getElementById('editTareaClienteSearch').value.toLowerCase();const resultados=document.getElementById('editTareaClienteResultados');if(!search){resultados.style.display='none';return;}const filtered=clientes.filter(c=>cliFull(c).toLowerCase().includes(search)).slice(0,10);if(filtered.length===0){resultados.innerHTML='<div style="padding:10px;color:var(--txt2);text-align:center">Sin resultados</div>';resultados.style.display='block';return;}resultados.innerHTML=filtered.map(c=>`<div style="padding:10px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--modal);transition:.1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--modal)'" onclick="seleccionarEditTareaCliente('${c.id}','${esc(cliFull(c))}')">${esc(cliFull(c))}</div>`).join('');resultados.style.display='block';}
+function seleccionarEditTareaCliente(id,nombre){window.editTareaClienteSeleccionadoId=id;document.getElementById('editTareaClienteSearch').value=nombre;document.getElementById('editTareaClienteResultados').style.display='none';}
+function guardarEditarTarea(){const id=document.getElementById('editTareaResultadosId');const t=tareas.find(x=>x.id===id);if(!t)return;const titulo=document.getElementById('editTareaTitulo').value.trim();const fecha=document.getElementById('editTareaFecha').value;const horaIni=document.getElementById('editTareaHora').value;const horaFin=document.getElementById('editTareaHoraFin').value;const desc=document.getElementById('editTareaDesc').value.trim();const estado=document.getElementById('editTareaEstado').value;if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}t.titulo=titulo;t.cliente_id=window.editTareaClienteSeleccionadoId||null;t.fecha=fecha;t.hora_inicio=horaIni;t.hora_fin=horaFin;t.descripcion=desc;t.estado=estado;saveToLocalStorage();syncTareaToSupabase(t);closeModal('modalEditarTarea');renderClienteModal();toast('Tarea actualizada','ok');}
 function deleteTarea(id){confirmDelete('¿Eliminar esta tarea?',()=>{tareas=tareas.filter(t=>t.id!==id);saveToLocalStorage();renderClienteModal();toast('Tarea eliminada','warn');});}
 async function syncTareaToSupabase(t){try{if(!window.supabase_client)throw new Error('Supabase no disponible');const{error}=await window.supabase_client.from('tareas').upsert({id:t.id,titulo:t.titulo,cliente_id:t.cliente_id,fecha:t.fecha,hora_inicio:t.hora_inicio,hora_fin:t.hora_fin,descripcion:t.descripcion,estado:t.estado,fecha_creacion:t.fecha_creacion},'id');if(error)throw error;console.log('✅ Tarea sincronizada a Supabase');}catch(e){console.warn('⚠️ No pude sincronizar tarea a Supabase:',e.message);saveToLocalStorage();}}
 /* ORDEN DE TRABAJO TAB */
