@@ -326,8 +326,17 @@ tr.clickable:hover{background:var(--bg3)}
 /* ========= SUPABASE CONFIGURATION ========= */
 const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
 let SYNC_ENABLED = false; // Evitar loops de sincronización
+
+// Inicializar Supabase cuando esté disponible
+function initSupabase(){
+  if(window.supabase){
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return true;
+  }
+  return false;
+}
 
 /* ========= CONSTANTS ========= */
 const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
@@ -604,7 +613,7 @@ function cancelarCita(id){
     renderCal();
     renderKanban();
     syncCitasToStorage();
-    if(cita)supabase.from('citas').delete().eq('id',id).then(()=>console.log('✅ Cita eliminada de Supabase'));
+    if(cita && supabase)supabase.from('citas').delete().eq('id',id).then(()=>console.log('✅ Cita eliminada de Supabase'));
     toast('Cita cancelada','warn');
   });
 }
@@ -1598,6 +1607,13 @@ function rejectSolicitud(rid){
 /* ========= SUPABASE SYNC FUNCTIONS ========= */
 async function loadFromSupabase(){
   try{
+    // Intentar inicializar Supabase si no está listo
+    if(!supabase){
+      if(!initSupabase()){
+        throw new Error('Supabase library not loaded');
+      }
+    }
+
     SYNC_ENABLED=false;
 
     // Cargar CLIENTES
@@ -1644,7 +1660,7 @@ async function loadFromSupabase(){
 }
 
 async function saveCitaToSupabase(cita){
-  if(!SYNC_ENABLED)return;
+  if(!SYNC_ENABLED || !supabase)return;
   try{
     const{error}=await supabase.from('citas').upsert([cita],{onConflict:'id'});
     if(error)throw error;
@@ -1655,6 +1671,7 @@ async function saveCitaToSupabase(cita){
 }
 
 async function setupRealtimeListeners(){
+  if(!supabase) return; // No hay conexión Supabase
   // Escuchar cambios en CITAS (para N8N)
   supabase.channel('citas-changes')
     .on('postgres_changes',{event:'*',schema:'public',table:'citas'},(payload)=>{
@@ -1698,8 +1715,23 @@ async function setupRealtimeListeners(){
 
 /* ========= INIT ========= */
 (async()=>{
-  await loadFromSupabase();
-  setupRealtimeListeners();
+  // Esperar a que Supabase esté disponible
+  let attempts = 0;
+  while(!initSupabase() && attempts < 50){
+    await new Promise(r=>setTimeout(r,100));
+    attempts++;
+  }
+
+  if(!supabase){
+    console.warn('⚠️ Supabase no disponible, usando seed local');
+    seed();
+  }else{
+    const loaded = await loadFromSupabase();
+    if(!loaded){
+      setupRealtimeListeners();
+    }
+  }
+
   populateFilters();
   renderCal();
   syncCitasToStorage();
