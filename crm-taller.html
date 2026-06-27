@@ -327,16 +327,10 @@ tr.clickable:hover{background:var(--bg3)}
 const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
 let supabase = null;
-let SYNC_ENABLED = false; // Evitar loops de sincronización
-
-// Inicializar Supabase cuando esté disponible
-function initSupabase(){
-  if(window.supabase){
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return true;
-  }
-  return false;
+if(window.supabase){
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
+let SYNC_ENABLED = false; // Evitar loops de sincronización
 
 /* ========= CONSTANTS ========= */
 const MARCAS_MOTO = ['Aprilia','Benelli','Beta','BMW','CF Moto','Derbi','Ducati','Gas Gas','Gilera','Harley-Davidson','Honda','Husqvarna','Kawasaki','KTM','Kymco','Moto Guzzi','Piaggio','Rieju','Royal Enfield','Sherco','SYM','Suzuki','Triumph','Vespa','Yamaha','Otra'];
@@ -1607,13 +1601,7 @@ function rejectSolicitud(rid){
 /* ========= SUPABASE SYNC FUNCTIONS ========= */
 async function loadFromSupabase(){
   try{
-    // Intentar inicializar Supabase si no está listo
-    if(!supabase){
-      if(!initSupabase()){
-        throw new Error('Supabase library not loaded');
-      }
-    }
-
+    if(!supabase) throw new Error('Supabase not available');
     SYNC_ENABLED=false;
 
     // Cargar CLIENTES
@@ -1715,21 +1703,14 @@ async function setupRealtimeListeners(){
 
 /* ========= INIT ========= */
 (async()=>{
-  // Esperar a que Supabase esté disponible
-  let attempts = 0;
-  while(!initSupabase() && attempts < 50){
-    await new Promise(r=>setTimeout(r,100));
-    attempts++;
-  }
+  // Intentar cargar desde Supabase, si falla usar seed local
+  const loaded = await loadFromSupabase().catch(()=>false);
 
-  if(!supabase){
-    console.warn('⚠️ Supabase no disponible, usando seed local');
+  if(!loaded){
+    console.log('Usando datos locales (seed)');
     seed();
   }else{
-    const loaded = await loadFromSupabase();
-    if(!loaded){
-      setupRealtimeListeners();
-    }
+    setupRealtimeListeners();
   }
 
   populateFilters();
