@@ -204,12 +204,12 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg><h1>Citas</h1></div><div class="page-sub">Calendario semanal de citas</div>
     <div class="toolbar">
       <button class="btn" onclick="openNewCita()">+ Nueva Cita</button>
-      <button class="btn" onclick="openNewTarea()">+ Crear Tarea</button>
       <button class="btn btn-sec" onclick="calWeek(-1)">‹ Anterior</button>
       <button class="btn btn-sec" onclick="calToday()">Hoy</button>
       <button class="btn btn-sec" onclick="calWeek(1)">Siguiente ›</button>
       <span id="calWeekLabel" style="font-weight:600;margin-left:8px"></span>
       <select id="filtroMecanico" onchange="renderCal()" style="margin-left:12px;min-width:180px"><option value="">Todos los mecánicos</option></select>
+      <button class="btn" onclick="openNewTarea()" style="margin-left:auto">+ Crear Tarea</button>
     </div>
     <div id="solicitudesPanel"></div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;align-items:center">
@@ -286,7 +286,7 @@ tr.clickable:hover{background:var(--bg3)}
 <div class="modal-bg" id="modalTarea"><div class="modal"><div class="modal-head"><h2>Nueva Tarea</h2><button class="x" onclick="closeModal('modalTarea')">×</button></div>
   <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
     <div class="field"><label>Título *</label><input id="tareaTitulo" placeholder="Ej: Llamar a cliente"></div>
-    <div class="field"><label>Cliente (opcional)</label><input id="tareaCliente" placeholder="Seleccionar cliente" readonly onclick="openTareaClientePicker()" style="cursor:pointer"></div>
+    <div class="field"><label>Cliente (opcional)</label><select id="tareaClienteSelect" style="width:100%"><option value="">- Seleccionar cliente -</option></select></div>
     <div class="row2"><div class="field"><label>Fecha *</label><input type="date" id="tareaFecha"></div><div class="field"><label>Hora inicio *</label><select id="tareaHora">${HORAS.map(h=>`<option>${h}</option>`).join('')}</select></div><div class="field"><label>Hora fin *</label><select id="tareaHoraFin">${HORAS.map(h=>`<option>${h}</option>`).join('')}</select></div></div>
     <div class="field"><label>Descripción</label><textarea id="tareaDesc" rows="3" placeholder="Detalles de la tarea..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -902,11 +902,8 @@ function cambiarEstadoCita(citaId, nuevoEstado){
   renderClienteModal();renderKanban();renderCal();
 }
 /* ========= TAREAS ========= */
-let tareaClienteSeleccionado=null;
-function openNewTarea(){tareaClienteSeleccionado=null;document.getElementById('tareaTitulo').value='';document.getElementById('tareaCliente').value='';document.getElementById('tareaFecha').value=today();document.getElementById('tareaHora').value='09:00';document.getElementById('tareaHoraFin').value='10:00';document.getElementById('tareaDesc').value='';openModal('modalTarea');}
-function openTareaClientePicker(){const clis=clientes.map(c=>`<div class="result-item" onclick="selectTareaCliente('${c.id}','${esc(cliFull(c))}')">${esc(cliFull(c))}</div>`).join('');const search=`<div class="results-dropdown">${clis}</div>`;const div=document.createElement('div');div.innerHTML=search;div.style.position='absolute';div.style.top='0';div.style.left='0';div.style.zIndex='10000';document.body.appendChild(div);document.addEventListener('click',()=>div.remove(),{once:true});}
-function selectTareaCliente(id,nombre){tareaClienteSeleccionado=id;document.getElementById('tareaCliente').value=nombre;}
-function saveTarea(){const titulo=document.getElementById('tareaTitulo').value.trim();const fecha=document.getElementById('tareaFecha').value;const horaIni=document.getElementById('tareaHora').value;const horaFin=document.getElementById('tareaHoraFin').value;const desc=document.getElementById('tareaDesc').value.trim();if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}const tarea={id:uid(),titulo,cliente_id:tareaClienteSeleccionado,fecha,hora_inicio:horaIni,hora_fin:horaFin,descripcion:desc,estado:'pendiente',fecha_creacion:today()};tareas.push(tarea);saveToLocalStorage();syncTareaToSupabase(tarea);closeModal('modalTarea');renderClienteModal();toast('Tarea creada','ok');}
+function openNewTarea(){document.getElementById('tareaTitulo').value='';document.getElementById('tareaClienteSelect').value='';document.getElementById('tareaFecha').value=today();document.getElementById('tareaHora').value='09:00';document.getElementById('tareaHoraFin').value='10:00';document.getElementById('tareaDesc').value='';const sel=document.getElementById('tareaClienteSelect');sel.innerHTML='<option value="">- Seleccionar cliente -</option>';clientes.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=cliFull(c);sel.appendChild(opt);});openModal('modalTarea');}
+function saveTarea(){const titulo=document.getElementById('tareaTitulo').value.trim();const clienteId=document.getElementById('tareaClienteSelect').value;const fecha=document.getElementById('tareaFecha').value;const horaIni=document.getElementById('tareaHora').value;const horaFin=document.getElementById('tareaHoraFin').value;const desc=document.getElementById('tareaDesc').value.trim();if(!titulo||!fecha||!horaIni||!horaFin){toast('Falta información obligatoria','err');return;}if(horaFin<=horaIni){toast('Hora fin debe ser posterior a hora inicio','err');return;}const tarea={id:uid(),titulo,cliente_id:clienteId||null,fecha,hora_inicio:horaIni,hora_fin:horaFin,descripcion:desc,estado:'pendiente',fecha_creacion:today()};tareas.push(tarea);saveToLocalStorage();syncTareaToSupabase(tarea);closeModal('modalTarea');renderClienteModal();toast('Tarea creada','ok');}
 function tabTareas(c){const ts=tareas.filter(t=>t.cliente_id===c.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));return `<div class="tabpane active">${ts.length===0?'<div class="empty">Sin tareas</div>':'<div style="display:flex;flex-direction:column;gap:10px">'+ts.map(t=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
 <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><div style="font-weight:600;font-size:14px;color:var(--accent)">${esc(t.titulo)}</div><span style="font-size:11px;padding:4px 8px;background:${t.estado==='completada'?'#22c55e':'#3b82f6'};border-radius:4px;color:#fff">${t.estado==='completada'?'✓ Completada':'Pendiente'}</span></div>
 <div style="font-size:12px;color:var(--txt2);margin-bottom:8px">${t.fecha} · ${t.hora_inicio}-${t.hora_fin}</div>
