@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRUPO VIA · Reserva tu cita - Avenida Madrid</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+.hdr{background:#fff;border-bottom:3px solid #3b82f6;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-logo{font-size:18px;font-weight:800;color:#3b82f6;letter-spacing:-.5px}
+.hdr-sub{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.hdr-badge{background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600}
+.hdr-location{font-size:12px;color:#3b82f6;font-weight:600;margin-left:auto}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#1e40af 100%);color:#fff;padding:20px 24px 18px;text-align:center}
+.hero h1{font-size:20px;font-weight:800;margin-bottom:4px}
+.hero-location{font-size:13px;opacity:.9;margin-bottom:12px;font-weight:500}
+.hero p{font-size:12px;opacity:.8;max-width:480px;margin:0 auto 12px;line-height:1.5}
+.hero-steps{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.hero-step{display:flex;align-items:center;gap:6px;font-size:11px;opacity:.85}
+.hero-step .num{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
+
+/* WEEK NAV */
+.week-nav{display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 24px 8px;background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:62px;z-index:90}
+.week-btn{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:600;color:#475569;transition:all .15s}
+.week-btn:hover{background:#e2e8f0;color:#1e293b}
+.week-label{font-size:13px;font-weight:700;color:#1e293b;min-width:200px;text-align:center}
+
+/* MAIN */
+.main{max-width:700px;margin:0 auto;padding:20px 16px 60px}
+
+/* DAY CARDS */
+.day-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;overflow:hidden;transition:box-shadow .15s}
+.day-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.day-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none}
+.day-head-left{display:flex;align-items:center;gap:10px}
+.day-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.day-dot.closed{background:#e2e8f0}
+.day-dot.partial{background:#f97316}
+.day-name{font-weight:700;font-size:13px;color:#1e293b}
+.day-date{font-size:11px;color:#64748b;margin-top:0}
+.day-meta{font-size:11px;color:#64748b;display:flex;align-items:center;gap:6px}
+.day-avail{background:#dcfce7;color:#166534;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600}
+.day-avail.none{background:#fee2e2;color:#991b1b}
+.day-avail.closed-tag{background:#f1f5f9;color:#94a3b8}
+.day-chevron{color:#94a3b8;font-size:14px;transition:transform .2s}
+.day-chevron.open{transform:rotate(180deg)}
+.day-body{display:none;padding:4px 14px 12px;border-top:1px solid #f1f5f9}
+.day-body.open{display:block}
+.closed-msg{text-align:center;padding:12px;color:#94a3b8;font-size:12px}
+
+/* SLOTS */
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
+.slot-btn{border:1.5px solid #3b82f6;border-radius:8px;padding:8px 6px;text-align:center;font-size:13px;font-weight:600;color:#3b82f6;background:#eff6ff;cursor:pointer;transition:all .15s}
+.slot-btn:hover{background:#3b82f6;color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.3)}
+.slot-btn.selected{background:#3b82f6;color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.4)}
+.slot-btn.occupied{border-color:#e2e8f0;background:#f8fafc;color:#cbd5e1;cursor:not-allowed}
+.slot-btn.past{border-color:#e2e8f0;background:#f8fafc;color:#cbd5e1;cursor:not-allowed}
+.slot-sep{grid-column:1/-1;height:1px;background:#f1f5f9;margin:4px 0}
+.slot-range-label{grid-column:1/-1;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8;font-weight:600;margin-top:4px}
+
+/* FORM */
+.booking-form{background:#fff;border:2px solid #3b82f6;border-radius:14px;padding:24px;margin-top:20px;box-shadow:0 8px 32px rgba(59,130,246,.12)}
+.booking-form h2{font-size:17px;font-weight:800;color:#1e293b;margin-bottom:4px}
+.booking-form .sel-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#1e40af;display:flex;align-items:center;gap:8px}
+.form-section{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#3b82f6;font-weight:700;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:13px;color:#1e293b;background:#f8fafc;transition:border-color .15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#3b82f6;background:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{width:100%;background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .15s;box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.submit-btn:hover{background:#2563eb;box-shadow:0 6px 16px rgba(59,130,246,.4)}
+.submit-btn:disabled{background:#94a3b8;cursor:not-allowed;box-shadow:none}
+.cancel-btn{width:100%;background:#f1f5f9;color:#64748b;border:none;border-radius:10px;padding:10px;font-size:13px;cursor:pointer;margin-top:8px}
+.cancel-btn:hover{background:#e2e8f0}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:60px 24px;max-width:480px;margin:40px auto}
+.success-icon{width:72px;height:72px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px}
+.success-screen h2{font-size:22px;font-weight:800;color:#1e293b;margin-bottom:8px}
+.success-screen p{color:#64748b;font-size:14px;line-height:1.6;margin-bottom:20px}
+.success-detail{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:left;font-size:13px;line-height:1.9}
+.success-detail b{color:#3b82f6}
+
+/* TOAST */
+.bk-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.bk-toast.show{opacity:1}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+
+@media(max-width:480px){
+  .hero h1{font-size:20px}
+  .hero-steps{gap:16px}
+  .row2{grid-template-columns:1fr}
+  .slots-grid{grid-template-columns:repeat(auto-fill,minmax(68px,1fr))}
+  .hdr-badge{display:none}
+  .hdr-location{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">
+    <div>
+      <div class="hdr-logo">GRUPO VIA</div>
+      <div class="hdr-sub">Taller de Motocicletas</div>
+    </div>
+  </div>
+  <div class="hdr-location">📍 Avenida Madrid, 80</div>
+  <div class="hdr-badge">Reserva tu cita</div>
+</div>
+
+<div class="hero">
+  <h1>Reserva tu cita</h1>
+  <div class="hero-location">📍 Taller Avenida Madrid, 80 • Barcelona</div>
+  <p>Selecciona el día y la hora que mejor te venga. La visita dura máximo 15 minutos — analizaremos tu moto y te daremos presupuesto sin compromiso.</p>
+  <div class="hero-steps">
+    <div class="hero-step"><div class="num">1</div>Elige día y hora</div>
+    <div class="hero-step"><div class="num">2</div>Rellena tus datos</div>
+    <div class="hero-step"><div class="num">3</div>Confirmación inmediata</div>
+  </div>
+</div>
+
+<div class="week-nav">
+  <button class="week-btn" onclick="changeWeek(-1)">‹ Anterior</button>
+  <div class="week-label" id="weekLabel"></div>
+  <button class="week-btn" onclick="changeWeek(1)">Siguiente ›</button>
+</div>
+
+<div class="main" id="mainContent">
+  <div id="daysContainer"></div>
+  <div id="bookingFormWrap" style="display:none">
+    <div class="booking-form">
+      <h2>Confirma tu reserva</h2>
+      <div class="sel-info" id="selInfo">
+        📅 <span id="selInfoText"></span>
+      </div>
+      <div class="form-section">Tus datos</div>
+      <div class="field"><label>Nombre completo *</label><input id="bNombre" placeholder="Juan García López" required oninput="formatNombreApellido(this)"></div>
+      <div class="row2">
+        <div class="field"><label>Teléfono *</label><input id="bTel" type="tel" placeholder="612 345 678" required></div>
+        <div class="field"><label>DNI / NIF *</label><input id="bDni" placeholder="12345678A" required></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Correo electrónico</label><input id="bCorreo" type="email" placeholder="juan@email.com" oninput="formatCorreo(this)"></div>
+      </div>
+      <div class="form-section">Datos de tu moto</div>
+      <div class="row2">
+        <div class="field">
+          <label>Marca *</label>
+          <select id="bMarca">
+            <option value="">— Selecciona —</option>
+            <option>BMW</option><option>Ducati</option><option>GasGas</option><option>Harley-Davidson</option>
+            <option>Honda</option><option>Husqvarna</option><option>Indian</option><option>Kawasaki</option>
+            <option>KTM</option><option>MotoGuzzi</option><option>MV Agusta</option><option>Piaggio</option>
+            <option>Royal Enfield</option><option>Suzuki</option><option>Triumph</option><option>Vespa</option>
+            <option>Yamaha</option><option>Zontes</option><option>Otra</option>
+          </select>
+        </div>
+        <div class="field"><label>Modelo *</label><input id="bModelo" placeholder="CBR 600, MT-07..."></div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Cilindrada</label>
+          <select id="bCil">
+            <option value="">— Selecciona —</option>
+            <option>50cc</option><option>125cc</option><option>250cc</option><option>300cc</option>
+            <option>400cc</option><option>500cc</option><option>600cc</option><option>650cc</option>
+            <option>700cc</option><option>750cc</option><option>800cc</option><option>900cc</option>
+            <option>1000cc</option><option>1100cc</option><option>1200cc</option><option>1300cc +</option>
+          </select>
+        </div>
+        <div class="field"><label>Matrícula</label><input id="bMat" placeholder="1234 ABC"></div>
+      </div>
+      <div class="field"><label>Kilómetros actuales</label><input id="bKm" type="number" placeholder="25000"></div>
+      <div class="form-section">Tu consulta</div>
+      <div class="field">
+        <label>Servicio solicitado *</label>
+        <select id="bServicio">
+          <option value="">— Selecciona —</option>
+          <option value="mantenimiento">Mantenimiento / Revisión</option>
+          <option value="reparacion">Reparación</option>
+          <option value="siniestro">Siniestro / Golpe</option>
+          <option value="itv">ITV / Puesta a punto</option>
+          <option value="mantenimiento">Diagnóstico / Fallo desconocido</option>
+          <option value="primera">Primera visita / Consulta</option>
+        </select>
+      </div>
+      <div class="field"><label>Descripción (opcional)</label><textarea id="bDesc" rows="3" placeholder="Cuéntanos brevemente qué le pasa a tu moto..."></textarea></div>
+      <div style="margin-top:16px;padding:12px;background:#f0f9ff;border-left:4px solid #3b82f6;border-radius:4px">
+        <label style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:#1e40af;font-weight:400;cursor:pointer">
+          <input id="bGDPR" type="checkbox" style="margin-top:2px;cursor:pointer" required>
+          <span>Acepto la <strong>Política de Privacidad</strong> y autorizo el tratamiento de mis datos conforme a RGPD. Entiendo que GRUPO VIA utilizará mis datos para contactarme sobre esta cita y futuros servicios.</span>
+        </label>
+      </div>
+      <button class="submit-btn" onclick="submitReserva()">Confirmar reserva</button>
+      <button class="cancel-btn" onclick="cancelForm()">Cancelar y elegir otro horario</button>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="successContent" style="display:none">
+  <div class="success-screen" style="display:block">
+    <div class="success-icon">✓</div>
+    <h2>¡Reserva confirmada!</h2>
+    <p>Hemos recibido tu solicitud. El equipo de GRUPO VIA (Avenida Madrid) la confirmará en breve. Te llamaremos al número que nos has dejado si hubiera algún cambio.</p>
+    <div class="success-detail" id="successDetail"></div>
+  </div>
+</div>
+
+<div class="footer">GRUPO VIA · Avenida Madrid, 80 · Barcelona · grupovia.es</div>
+<div class="bk-toast" id="bkToast"></div>
+
+<script>
+// ─── SUPABASE ────────────────────────────────────────────────
+const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+
+async function guardarEnSupabase(reserva){
+  try{
+    const h={'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`};
+
+    // 1. Buscar/crear cliente
+    let cliId=null;
+    const cliChk=await fetch(`${SUPABASE_URL}/rest/v1/clientes?telefono=eq.${encodeURIComponent(reserva.telefono)}&select=id`,{headers:h});
+    const clientes=cliChk.ok?await cliChk.json():[];
+
+    if(clientes.length>0){
+      cliId=clientes[0].id;
+    }else{
+      const cliPost=await fetch(`${SUPABASE_URL}/rest/v1/clientes`,{method:'POST',headers:h,body:JSON.stringify({nombre:reserva.nombre.split(' ')[0],apellidos:reserva.nombre.split(' ').slice(1).join(' '),telefono:reserva.telefono,dni:reserva.dni,correo:reserva.correo})});
+      if(!cliPost.ok)throw new Error('Cliente fail');
+      const [c]=await cliPost.json();
+      cliId=c.id;
+    }
+
+    // 2. Crear moto
+    const motoPost=await fetch(`${SUPABASE_URL}/rest/v1/motos`,{method:'POST',headers:h,body:JSON.stringify({cliente_id:cliId,marca:reserva.moto_marca,modelo:reserva.moto_modelo,cilindrada:reserva.moto_cilindrada,matricula:reserva.moto_matricula,bastidor:'',kilometros:reserva.moto_km||null})});
+    if(!motoPost.ok)throw new Error('Moto fail');
+    const [m]=await motoPost.json();
+
+    // 3. Crear cita
+    const citaPost=await fetch(`${SUPABASE_URL}/rest/v1/citas`,{method:'POST',headers:h,body:JSON.stringify({cliente_id:cliId,moto_id:m.id,tipo_servicio:reserva.servicio_crm,fecha_cita:reserva.fecha,hora_cita:reserva.hora,hora_fin:reserva.hora_fin,mecanico_id:null,nota:reserva.descripcion,estado:'pendiente_confirmacion'})});
+    if(!citaPost.ok)throw new Error('Cita fail');
+    return await citaPost.json();
+  }catch(e){
+    console.error('Supabase error:',e);
+    toast('⚠️ Error al guardar en BD, pero tu solicitud se registró');
+  }
+}
+
+// ─── CONFIG ────────────────────────────────────────────────
+const TALLER='madrid';
+const TALLER_NOMBRE='Avenida Madrid, 80';
+
+// ─── HORARIO ────────────────────────────────────────────────
+const HORARIO={
+  0:null,
+  1:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],
+  2:[{ini:'10:00',fin:'17:00'}],
+  3:null,
+  4:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],
+  5:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],
+  6:[{ini:'10:00',fin:'14:00'}],
+};
+const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const SLOT_MIN=15;
+
+// ─── STATE ──────────────────────────────────────────────────
+let baseDate=new Date();
+let selectedSlot=null; // {fecha, hora, label}
+
+// ─── UTILS ──────────────────────────────────────────────────
+function pad(n){return String(n).padStart(2,'0');}
+function dateStr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function fromMins(m){return pad(Math.floor(m/60))+':'+pad(m%60);}
+function addMins(t,n){return fromMins(toMins(t)+n);}
+function nowStr(){const n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())+'T'+pad(n.getHours())+':'+pad(n.getMinutes());}
+
+function getMondayOf(d){
+  const day=d.getDay();
+  const diff=day===0?-6:1-day;
+  const mon=new Date(d);
+  mon.setDate(d.getDate()+diff);
+  return mon;
+}
+
+function weekDays(monday){
+  return Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return d;});
+}
+
+// ─── STORAGE ────────────────────────────────────────────────
+function getOcupados(){
+  try{return JSON.parse(localStorage.getItem('gv_ocupados_'+TALLER)||'[]');}catch{return[];}
+}
+function getPendientes(){
+  try{return JSON.parse(localStorage.getItem('gv_reservas_'+TALLER)||'[]');}catch{return[];}
+}
+function saveReserva(r){
+  const list=getPendientes();
+  list.push(r);
+  localStorage.setItem('gv_reservas_'+TALLER,JSON.stringify(list));
+}
+
+// ─── SLOT LOGIC ─────────────────────────────────────────────
+function generateSlots(date){
+  const dow=date.getDay();
+  const ranges=HORARIO[dow];
+  if(!ranges)return[];
+  const result=[];
+  ranges.forEach(({ini,fin})=>{
+    let cur=toMins(ini);
+    const end=toMins(fin);
+    while(cur+SLOT_MIN<=end){
+      result.push({time:fromMins(cur),range:ini+'-'+fin});
+      cur+=SLOT_MIN;
+    }
+  });
+  return result;
+}
+
+function isOccupied(fecha,slotTime){
+  const ocupados=getOcupados();
+  const pendientes=getPendientes().filter(p=>p.fecha===fecha);
+  const si=toMins(slotTime);
+  const sf=si+SLOT_MIN;
+  const overlap=(oIni,oFin)=>si<oFin&&sf>oIni;
+  if(ocupados.some(o=>{
+    if(o.fecha!==fecha)return false;
+    const oi=toMins(o.hora_ini);
+    const of_=toMins(o.hora_fin||addMins(o.hora_ini,30));
+    return overlap(oi,of_);
+  }))return true;
+  if(pendientes.some(p=>overlap(toMins(p.hora),toMins(p.hora)+SLOT_MIN)))return true;
+  return false;
+}
+
+function isPast(fecha,slotTime){
+  const now=new Date();
+  const today=dateStr(now);
+  if(fecha<today)return true;
+  if(fecha>today)return false;
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const slotMins=toMins(slotTime);
+  return slotMins<(nowMins+720);
+}
+
+function formatCorreo(el){
+  el.value=el.value.toLowerCase();
+}
+
+function formatNombreApellido(el){
+  const val=el.value;
+  if(val===val.toUpperCase()&&val.length>0&&/[A-Z]/.test(val)){
+    el.value=val.split(/\s+/).map(word=>word.charAt(0).toUpperCase()+word.slice(1).toLowerCase()).join(' ');
+  }
+}
+
+// ─── RENDER ─────────────────────────────────────────────────
+function changeWeek(n){
+  baseDate.setDate(baseDate.getDate()+n*7);
+  renderWeek();
+}
+
+function renderWeek(){
+  const monday=getMondayOf(baseDate);
+  const days=weekDays(monday);
+  const d0=days[0],d6=days[6];
+  document.getElementById('weekLabel').textContent=
+    `${d0.getDate()} ${MESES[d0.getMonth()]} – ${d6.getDate()} ${MESES[d6.getMonth()]} ${d6.getFullYear()}`;
+
+  const today=dateStr(new Date());
+  let html='';
+  days.forEach((d,i)=>{
+    const fecha=dateStr(d);
+    const dow=d.getDay();
+    const closed=!HORARIO[dow];
+    const slots=generateSlots(d);
+    const isPastDay=fecha<today;
+    const available=slots.filter(s=>!isPast(fecha,s.time)&&!isOccupied(fecha,s.time));
+    const isToday=fecha===today;
+
+    let dotClass=closed||isPastDay?'closed':available.length===0?'closed':'';
+    let tagHtml='';
+    if(closed)tagHtml='<span class="day-avail closed-tag">Cerrado</span>';
+    else if(isPastDay)tagHtml='<span class="day-avail closed-tag">Pasado</span>';
+    else if(available.length===0)tagHtml='<span class="day-avail none">Sin huecos</span>';
+    else tagHtml=`<span class="day-avail">${available.length} hueco${available.length!==1?'s':''}</span>`;
+
+    html+=`<div class="day-card" id="dc_${fecha}">
+      <div class="day-head" onclick="toggleDay('${fecha}',${closed||isPastDay})">
+        <div class="day-head-left">
+          <div class="day-dot ${dotClass}"></div>
+          <div>
+            <div class="day-name">${DIAS[dow]}${isToday?' <span style="font-size:11px;color:#3b82f6;font-weight:600">· HOY</span>':''}</div>
+            <div class="day-date">${d.getDate()} de ${MESES[d.getMonth()]}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${tagHtml}
+          ${!closed&&!isPastDay?`<div class="day-chevron" id="chv_${fecha}">▾</div>`:''}
+        </div>
+      </div>
+      <div class="day-body" id="db_${fecha}">
+        ${renderDayBody(fecha,slots,d)}
+      </div>
+    </div>`;
+  });
+  document.getElementById('daysContainer').innerHTML=html;
+  if(selectedSlot&&!document.getElementById('dc_'+selectedSlot.fecha)){
+    selectedSlot=null;
+    document.getElementById('bookingFormWrap').style.display='none';
+  }
+}
+
+function renderDayBody(fecha,slots,d){
+  if(!slots.length)return'<div class="closed-msg">Cerrado este día</div>';
+  const today=dateStr(new Date());
+  const pendientes=getPendientes().filter(p=>p.fecha===fecha);
+  let html='';
+  let lastRange='';
+  html+='<div class="slots-grid">';
+  slots.forEach(s=>{
+    if(s.range!==lastRange){
+      if(lastRange)html+='<div class="slot-sep"></div>';
+      const [ri,rf]=s.range.split('-');
+      html+=`<div class="slot-range-label">${ri} – ${rf}</div>`;
+      lastRange=s.range;
+    }
+    const past=isPast(fecha,s.time);
+    const occ=isOccupied(fecha,s.time);
+    const sel=selectedSlot&&selectedSlot.fecha===fecha&&selectedSlot.hora===s.time;
+    const reservaEnSlot=pendientes.find(p=>p.hora===s.time);
+    let cls='slot-btn';
+    if(past||occ)cls+=' '+(past?'past':'occupied');
+    else if(sel)cls+=' selected';
+    const tooltip=occ?'Ocupado':past?'Hora pasada':reservaEnSlot&&reservaEnSlot.descripcion?`${reservaEnSlot.nombre} - ${reservaEnSlot.descripcion}`:'';
+    html+=`<div class="${cls}" ${(!past&&!occ)?`onclick="selectSlot('${fecha}','${s.time}','${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}')"`:''} title="${tooltip}">${s.time}</div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+function toggleDay(fecha,disabled){
+  if(disabled)return;
+  const body=document.getElementById('db_'+fecha);
+  const chv=document.getElementById('chv_'+fecha);
+  const isOpen=body.classList.contains('open');
+  document.querySelectorAll('.day-body.open').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('.day-chevron.open').forEach(el=>el.classList.remove('open'));
+  if(!isOpen){body.classList.add('open');if(chv)chv.classList.add('open');}
+}
+
+function selectSlot(fecha,hora,label){
+  selectedSlot={fecha,hora,label};
+  document.querySelectorAll('.slot-btn.selected').forEach(el=>el.classList.remove('selected'));
+  const slots=generateSlots(new Date(fecha));
+  const d=new Date(fecha);
+  document.getElementById('db_'+fecha).innerHTML=renderDayBody(fecha,slots,d);
+  document.getElementById('db_'+fecha).classList.add('open');
+  document.getElementById('chv_'+fecha)&&document.getElementById('chv_'+fecha).classList.add('open');
+  document.getElementById('selInfoText').textContent=`${label} a las ${hora}`;
+  document.getElementById('bookingFormWrap').style.display='block';
+  setTimeout(()=>document.getElementById('bookingFormWrap').scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function cancelForm(){
+  selectedSlot=null;
+  document.getElementById('bookingFormWrap').style.display='none';
+  renderWeek();
+}
+
+// ─── SUBMIT ─────────────────────────────────────────────────
+function submitReserva(){
+  if(!selectedSlot){toast('Selecciona un horario primero');return;}
+  const nombre=document.getElementById('bNombre').value.trim();
+  const tel=document.getElementById('bTel').value.trim();
+  const dni=document.getElementById('bDni').value.trim();
+  const marca=document.getElementById('bMarca').value;
+  const modelo=document.getElementById('bModelo').value.trim();
+  const servicioCrm=document.getElementById('bServicio').value;
+  const servicioLabel=document.getElementById('bServicio').options[document.getElementById('bServicio').selectedIndex]?.text||'';
+  const gdprAceptado=document.getElementById('bGDPR').checked;
+  if(!nombre){toast('Escribe tu nombre completo');return;}
+  if(!tel||tel.length<9){toast('Teléfono inválido');return;}
+  if(!dni){toast('Escribe tu DNI / NIF');return;}
+  if(!marca){toast('Selecciona la marca de tu moto');return;}
+  if(!modelo){toast('Escribe el modelo de tu moto');return;}
+  if(!servicioCrm){toast('Selecciona el servicio solicitado');return;}
+  if(!gdprAceptado){toast('Debes aceptar la Política de Privacidad RGPD');return;}
+
+  const r={
+    id:uid(),
+    taller:TALLER,
+    fecha:selectedSlot.fecha,
+    hora:selectedSlot.hora,
+    hora_fin:addMins(selectedSlot.hora,SLOT_MIN),
+    nombre,
+    telefono:tel,
+    dni,
+    correo:document.getElementById('bCorreo').value.trim(),
+    moto_marca:marca,
+    moto_modelo:modelo,
+    moto_cilindrada:document.getElementById('bCil').value,
+    moto_matricula:document.getElementById('bMat').value.trim(),
+    moto_km:parseInt(document.getElementById('bKm').value)||0,
+    servicio:servicioLabel,
+    servicio_crm:servicioCrm,
+    descripcion:document.getElementById('bDesc').value.trim(),
+    tipo:'primera_visita',
+    estado:'pendiente_confirmacion',
+    aceptado_gdpr:gdprAceptado,
+    fecha_aceptacion_gdpr:new Date().toISOString(),
+    timestamp:nowStr()
+  };
+
+  saveReserva(r);
+  guardarEnSupabase(r);
+
+  document.getElementById('mainContent').style.display='none';
+  document.querySelector('.week-nav').style.display='none';
+  document.getElementById('successContent').style.display='block';
+  document.getElementById('successDetail').innerHTML=`
+    <b>Día y hora:</b> ${selectedSlot.label} a las ${selectedSlot.hora}<br>
+    <b>Nombre:</b> ${nombre}<br>
+    <b>Teléfono:</b> ${tel}<br>
+    <b>Moto:</b> ${marca} ${modelo}${document.getElementById('bMat').value?' · '+document.getElementById('bMat').value:''}<br>
+    <b>Servicio:</b> ${servicioLabel}<br>
+    <br>
+    <span style="font-size:12px;color:#64748b">Referencia: <code>${r.id.slice(-8).toUpperCase()}</code></span>
+  `;
+}
+
+// ─── TOAST ──────────────────────────────────────────────────
+function toast(msg){
+  const t=document.getElementById('bkToast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+renderWeek();
+</script>
+</body>
+</html>
