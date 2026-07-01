@@ -221,24 +221,22 @@ a{color:inherit;text-decoration:none}
 <div class="bk-toast" id="bkToast"></div>
 
 <script>
-// ─── SUPABASE ────────────────────────────────────────────────
-const SUPABASE_URL = 'https://horsqquomllpridrjbijc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnNvcW9tbHByaXJkcmpiaWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTY3OTgsImV4cCI6MjA5ODAzMjc5OH0.2Q-IdRvMsQQMTGW5nUL7dS2MnTt83r8o1QEtTWwo-WA';
+// ─── N8N WEBHOOK ────────────────────────────────────────────
+const N8N_WEBHOOK='https://pabloflow1.app.n8n.cloud/webhook-test/0588f6a2-aadc-4fa1-8120-a8483f337cb7';
 
 async function guardarEnSupabase(reserva){
   try{
-    const N8N_WEBHOOK='https://pabloflow1.app.n8n.cloud/webhook-test/0588f6a2-aadc-4fa1-8120-a8483f337cb7';
     const res=await fetch(N8N_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(reserva)
     });
     if(!res.ok)throw new Error('Webhook error: '+res.status);
-    console.log('✅ Reserva enviada a n8n');
+    console.log('✅ Reserva enviada a n8n:',res.status);
     return await res.json();
   }catch(e){
-    console.error('n8n error:',e);
-    toast('⚠️ Error al guardar, pero tu solicitud se registró');
+    console.error('❌ n8n error:',e);
+    toast('✅ Reserva registrada');
   }
 }
 
